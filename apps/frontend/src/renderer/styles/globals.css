@@ -479,6 +479,242 @@
   --shadow-focus: 0 0 0 2px rgba(90, 141, 189, 0.3);
 }
 
+/* CYBERPUNK MODE - Neon Futurism */
+.cyberpunk {
+  /* Typography - Futuristic tech font */
+  font-family: 'Rajdhani', 'Orbitron', 'SF Mono', 'Courier New', monospace;
+  letter-spacing: 0.02em;
+
+  /* Base colors - Dark with neon accents */
+  --background: #0A0E27;
+  --foreground: #E0E7FF;
+
+  /* Card surfaces */
+  --card: #131736;
+  --card-foreground: #E0E7FF;
+
+  /* Primary (neon cyan) */
+  --primary: #00F0FF;
+  --primary-foreground: #0A0E27;
+
+  --secondary: #1A1F3A;
+  --secondary-foreground: #E0E7FF;
+
+  --muted: #1A1F3A;
+  --muted-foreground: #8B92B0;
+
+  /* Accent hover/active states */
+  --accent: #1A1F3A;
+  --accent-foreground: #FF00FF;
+
+  --destructive: #FF0080;
+  --destructive-foreground: #E0E7FF;
+
+  /* Borders and inputs */
+  --border: #2A3052;
+  --input: #2A3052;
+  --ring: #00F0FF;
+
+  /* Sidebar */
+  --sidebar: #131736;
+  --sidebar-foreground: #E0E7FF;
+
+  /* Popover */
+  --popover: #131736;
+  --popover-foreground: #E0E7FF;
+
+  /* Semantic colors - Neon variants */
+  --success: #00FF9F;
+  --success-foreground: #0A0E27;
+  --success-light: rgba(0, 255, 159, 0.15);
+  --warning: #FFD600;
+  --warning-foreground: #0A0E27;
+  --warning-light: rgba(255, 214, 0, 0.15);
+  --info: #00F0FF;
+  --info-foreground: #0A0E27;
+  --info-light: rgba(0, 240, 255, 0.15);
+  --error: #FF0080;
+  --error-foreground: #E0E7FF;
+  --error-light: rgba(255, 0, 128, 0.15);
+
+  /* Shadows - Neon glow effects */
+  --shadow-sm: 0 0 4px rgba(0, 240, 255, 0.3);
+  --shadow-md: 0 0 8px rgba(0, 240, 255, 0.4);
+  --shadow-lg: 0 0 16px rgba(0, 240, 255, 0.5);
+  --shadow-xl: 0 0 24px rgba(0, 240, 255, 0.6);
+  --shadow-focus: 0 0 0 2px rgba(0, 240, 255, 0.5), 0 0 12px rgba(0, 240, 255, 0.4);
+
+  /* Border radius - Sharp, minimal */
+  --radius: 2px;
+}
+
+/* CYBERPUNK MODE DARK - Enhanced neon glow */
+.dark.cyberpunk {
+  /* Even darker background for more contrast */
+  --background: #050814;
+  --foreground: #F0F4FF;
+
+  --card: #0D1128;
+  --card-foreground: #F0F4FF;
+
+  /* Brighter neon cyan */
+  --primary: #00FFFF;
+  --primary-foreground: #050814;
+
+  --secondary: #141832;
+  --secondary-foreground: #F0F4FF;
+
+  --muted: #141832;
+  --muted-foreground: #9AA0C0;
+
+  /* Brighter neon magenta for accents */
+  --accent: #141832;
+  --accent-foreground: #FF00FF;
+
+  --border: #1F2547;
+  --input: #1F2547;
+  --ring: #00FFFF;
+
+  --sidebar: #0D1128;
+  --sidebar-foreground: #F0F4FF;
+
+  --popover: #0D1128;
+  --popover-foreground: #F0F4FF;
+
+  /* Enhanced neon glow shadows */
+  --shadow-sm: 0 0 6px rgba(0, 255, 255, 0.4);
+  --shadow-md: 0 0 12px rgba(0, 255, 255, 0.5);
+  --shadow-lg: 0 0 20px rgba(0, 255, 255, 0.6);
+  --shadow-xl: 0 0 32px rgba(0, 255, 255, 0.7);
+  --shadow-focus: 0 0 0 2px rgba(0, 255, 255, 0.6), 0 0 16px rgba(0, 255, 255, 0.5);
+}
+
+/* HERMES MODE - Luxury Elegance */
+.hermes {
+  /* Typography - Elegant, luxury font */
+  font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  letter-spacing: 0.01em;
+
+  /* Base colors - Warm luxury palette */
+  --background: #FFF9F5;
+  --foreground: #2C1810;
+
+  /* Card surfaces */
+  --card: #FFF5ED;
+  --card-foreground: #2C1810;
+
+  /* Primary (Hermes orange) */
+  --primary: #FF6600;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #F5E6D3;
+  --secondary-foreground: #2C1810;
+
+  --muted: #F9F1E7;
+  --muted-foreground: #8B7355;
+
+  /* Accent hover/active states */
+  --accent: #F5E6D3;
+  --accent-foreground: #FF6600;
+
+  --destructive: #D63031;
+  --destructive-foreground: #FFFFFF;
+
+  /* Borders and inputs */
+  --border: #E8D4BE;
+  --input: #E8D4BE;
+  --ring: #FF6600;
+
+  /* Sidebar */
+  --sidebar: #FFF5ED;
+  --sidebar-foreground: #2C1810;
+
+  /* Popover */
+  --popover: #FFF5ED;
+  --popover-foreground: #2C1810;
+
+  /* Semantic colors - Luxury variants */
+  --success: #27AE60;
+  --success-foreground: #FFFFFF;
+  --success-light: rgba(39, 174, 96, 0.12);
+  --warning: #F39C12;
+  --warning-foreground: #FFFFFF;
+  --warning-light: rgba(243, 156, 18, 0.12);
+  --info: #3498DB;
+  --info-foreground: #FFFFFF;
+  --info-light: rgba(52, 152, 219, 0.12);
+  --error: #D63031;
+  --error-foreground: #FFFFFF;
+  --error-light: rgba(214, 48, 49, 0.12);
+
+  /* Shadows - Soft, elegant */
+  --shadow-sm: 0 2px 4px rgba(44, 24, 16, 0.06);
+  --shadow-md: 0 4px 8px rgba(44, 24, 16, 0.08);
+  --shadow-lg: 0 8px 16px rgba(44, 24, 16, 0.1);
+  --shadow-xl: 0 12px 24px rgba(44, 24, 16, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(255, 102, 0, 0.2);
+
+  /* Border radius - Rounded, elegant */
+  --radius: 12px;
+}
+
+/* HERMES MODE DARK - Sophisticated luxury */
+.dark.hermes {
+  /* Rich dark brown background */
+  --background: #1A0F08;
+  --foreground: #F9F1E7;
+
+  --card: #2C1810;
+  --card-foreground: #F9F1E7;
+
+  /* Bright Hermes orange for dark mode */
+  --primary: #FF8533;
+  --primary-foreground: #1A0F08;
+
+  --secondary: #3D2818;
+  --secondary-foreground: #F9F1E7;
+
+  --muted: #3D2818;
+  --muted-foreground: #B8A086;
+
+  --accent: #3D2818;
+  --accent-foreground: #FF8533;
+
+  --destructive: #E74C3C;
+  --destructive-foreground: #F9F1E7;
+
+  --border: #4D3425;
+  --input: #4D3425;
+  --ring: #FF8533;
+
+  --sidebar: #2C1810;
+  --sidebar-foreground: #F9F1E7;
+
+  --popover: #2C1810;
+  --popover-foreground: #F9F1E7;
+
+  /* Luxury dark mode semantic colors */
+  --success: #2ECC71;
+  --success-foreground: #1A0F08;
+  --success-light: rgba(46, 204, 113, 0.15);
+  --warning: #F5B041;
+  --warning-foreground: #1A0F08;
+  --warning-light: rgba(245, 176, 65, 0.15);
+  --info: #5DADE2;
+  --info-foreground: #1A0F08;
+  --info-light: rgba(93, 173, 226, 0.15);
+  --error: #E74C3C;
+  --error-foreground: #F9F1E7;
+  --error-light: rgba(231, 76, 60, 0.15);
+
+  /* Soft elegant shadows for dark */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.6);
+  --shadow-focus: 0 0 0 3px rgba(255, 133, 51, 0.3);
+}
+
 
 /* Base styles */
 * {

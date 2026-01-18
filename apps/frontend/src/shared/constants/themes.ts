@@ -46,5 +46,27 @@ export const COLOR_THEMES: ColorThemeDefinition[] = [
       darkBg: '#1C232E',
       darkAccent: '#3D6FA3'
     }
+  },
+  {
+    id: 'cyberpunk',
+    name: 'Cyberpunk',
+    description: 'Neon futurism with glowing cyan and magenta',
+    previewColors: {
+      bg: '#0A0E27',
+      accent: '#00F0FF',
+      darkBg: '#050814',
+      darkAccent: '#00FFFF'
+    }
+  },
+  {
+    id: 'hermes',
+    name: 'Hermès',
+    description: 'Luxury elegance with signature orange accents',
+    previewColors: {
+      bg: '#FFF9F5',
+      accent: '#FF6600',
+      darkBg: '#1A0F08',
+      darkAccent: '#FF8533'
+    }
   }
 ];

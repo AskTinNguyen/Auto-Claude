@@ -421,13 +421,17 @@ export function App() {
       : 'rams';
 
     // Remove all color theme classes
-    root.classList.remove('beige', 'cool');
+    root.classList.remove('beige', 'cool', 'cyberpunk', 'hermes');
 
     // Apply color theme class (rams is default :root, no class needed)
     if (colorTheme === 'beige') {
       root.classList.add('beige');
     } else if (colorTheme === 'cool') {
       root.classList.add('cool');
+    } else if (colorTheme === 'cyberpunk') {
+      root.classList.add('cyberpunk');
+    } else if (colorTheme === 'hermes') {
+      root.classList.add('hermes');
     }
     // 'rams' theme uses :root styles (no class needed)
 
