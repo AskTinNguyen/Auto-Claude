@@ -142,7 +142,16 @@
     "autoMerged": "Fusion Auto:",
     "gitConflicts": "Conflits Git:",
     "strategy": "Stratégie:",
-    "viewFiles": "Voir les fichiers affectés"
+    "viewFiles": "Voir les fichiers affectés",
+    "errorLoading": "Échec du chargement de l'historique des fusions",
+    "unknownError": "Erreur inconnue",
+    "notAvailable": "N/D",
+    "strategies": {
+      "fast-forward": "Avance Rapide",
+      "3-way": "Fusion à 3 Voies",
+      "ai-assisted": "Assisté par IA",
+      "manual": "Manuel"
+    }
   },
   "metadata": {
     "severity": "sévérité",

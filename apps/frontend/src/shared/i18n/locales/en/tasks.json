@@ -142,7 +142,16 @@
     "autoMerged": "Auto Merged:",
     "gitConflicts": "Git Conflicts:",
     "strategy": "Strategy:",
-    "viewFiles": "View affected files"
+    "viewFiles": "View affected files",
+    "errorLoading": "Failed to load merge history",
+    "unknownError": "Unknown error",
+    "notAvailable": "N/A",
+    "strategies": {
+      "fast-forward": "Fast Forward",
+      "3-way": "3-Way Merge",
+      "ai-assisted": "AI Assisted",
+      "manual": "Manual"
+    }
   },
   "metadata": {
     "severity": "severity",

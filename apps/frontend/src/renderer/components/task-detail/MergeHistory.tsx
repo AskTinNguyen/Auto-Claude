@@ -37,8 +37,8 @@ function formatTimestamp(timestamp: string): string {
 }
 
 // Helper to format duration
-function formatDuration(seconds: number | null | undefined): string {
-  if (!seconds) return 'N/A';
+function formatDuration(seconds: number | null | undefined, t: (key: string) => string): string {
+  if (!seconds) return t('mergeHistory.notAvailable');
   if (seconds < 60) return `${Math.round(seconds)}s`;
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.round(seconds % 60);
@@ -77,14 +77,14 @@ export function MergeHistory({ task }: MergeHistoryProps) {
       if (result.success && result.data) {
         setMergeHistory(result.data);
       } else {
-        throw new Error(result.error || 'Failed to load merge history');
+        throw new Error(result.error || t('mergeHistory.errorLoading'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : t('mergeHistory.unknownError'));
     } finally {
       setIsLoading(false);
     }
-  }, [task.specId]);
+  }, [task.specId, t]);
 
   // Load on mount
   useEffect(() => {
@@ -163,7 +163,7 @@ export function MergeHistory({ task }: MergeHistoryProps) {
               {/* Duration badge */}
               {record.duration_seconds && (
                 <Badge variant="outline" className="text-xs">
-                  {formatDuration(record.duration_seconds)}
+                  {formatDuration(record.duration_seconds, t)}
                 </Badge>
               )}
             </div>
@@ -235,7 +235,7 @@ export function MergeHistory({ task }: MergeHistoryProps) {
                 variant="outline"
                 className={cn('text-xs', getStrategyColor(record.merge_strategy))}
               >
-                {record.merge_strategy}
+                {t(`mergeHistory.strategies.${record.merge_strategy}`, record.merge_strategy)}
               </Badge>
             </div>
 
