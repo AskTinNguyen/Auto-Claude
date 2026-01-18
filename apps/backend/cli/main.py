@@ -280,6 +280,57 @@ Environment Variables:
         help="Actually delete files in cleanup (not just preview)",
     )
 
+    # Bug Wikipedia commands
+    bug_group = parser.add_argument_group("Bug Wikipedia")
+    bug_group.add_argument(
+        "--bug-scan",
+        action="store_true",
+        help="Scan git history for bug-related commits",
+    )
+    bug_group.add_argument(
+        "--bug-categorize",
+        action="store_true",
+        help="Categorize uncategorized bugs using AI",
+    )
+    bug_group.add_argument(
+        "--bug-wiki",
+        action="store_true",
+        help="Generate bug Wikipedia markdown documentation",
+    )
+    bug_group.add_argument(
+        "--bug-detect",
+        action="store_true",
+        help="Detect recurring bug patterns and create GitHub issues",
+    )
+    bug_group.add_argument(
+        "--bug-status",
+        action="store_true",
+        help="Show bug Wikipedia statistics and status",
+    )
+    bug_group.add_argument(
+        "--bug-deep-dive",
+        type=str,
+        metavar="PATTERN_KEY",
+        help="Trigger deep dive analysis for a bug pattern (e.g., logic-error-auth)",
+    )
+    bug_group.add_argument(
+        "--bug-mode",
+        choices=["auto-claude", "project"],
+        default="project",
+        help="Scan mode: auto-claude (scan Auto-Claude repo) or project (scan user project)",
+    )
+    bug_group.add_argument(
+        "--limit",
+        type=int,
+        metavar="N",
+        help="Limit number of bugs to process (for --bug-categorize)",
+    )
+    bug_group.add_argument(
+        "--dry-run-bugs",
+        action="store_true",
+        help="Preview bug categorization without API calls",
+    )
+
     return parser.parse_args()
 
 
@@ -354,6 +405,43 @@ def _run_cli() -> None:
 
     if args.batch_cleanup:
         handle_batch_cleanup_command(str(project_dir), dry_run=not args.no_dry_run)
+        return
+
+    # Handle Bug Wikipedia commands
+    if args.bug_scan:
+        from cli.bug_commands import run_bug_scan_command
+
+        run_bug_scan_command(args)
+        return
+
+    if args.bug_categorize:
+        from cli.bug_commands import run_bug_categorize_command
+
+        run_bug_categorize_command(args)
+        return
+
+    if args.bug_wiki:
+        from cli.bug_commands import run_bug_generate_command
+
+        run_bug_generate_command(args)
+        return
+
+    if args.bug_detect:
+        from cli.bug_commands import run_bug_detect_command
+
+        run_bug_detect_command(args)
+        return
+
+    if args.bug_status:
+        from cli.bug_commands import run_bug_status_command
+
+        run_bug_status_command(args)
+        return
+
+    if args.bug_deep_dive:
+        from cli.bug_commands import run_bug_deep_dive_command
+
+        run_bug_deep_dive_command(args)
         return
 
     # Require --spec if not listing
