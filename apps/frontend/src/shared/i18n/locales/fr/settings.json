@@ -45,6 +45,14 @@
       "title": "Notifications",
       "description": "Préférences d'alertes"
     },
+    "tts": {
+      "title": "Synthèse Vocale",
+      "description": "Paramètres de synthèse vocale"
+    },
+    "lan": {
+      "title": "Accès LAN",
+      "description": "Paramètres d'accès à distance"
+    },
     "debug": {
       "title": "Debug & Logs",
       "description": "Outils de dépannage"
@@ -591,5 +599,20 @@
       "openai": "Ceci ressemble à une API OpenAI. Vous aurez besoin d'une clé API.",
       "createOpenaiKey": "Créer une clé API OpenAI"
     }
+  },
+  "lan": {
+    "title": "Accès réseau local",
+    "enableLan": "Activer l'accès réseau",
+    "enableLanDescription": "Autoriser l'accès depuis les appareils sur votre réseau local",
+    "staticPin": "Code PIN statique (optionnel)",
+    "pinPlaceholder": "Entrez un code PIN à 4 chiffres (ou laissez vide pour aléatoire)",
+    "pinHint": "Laissez vide pour générer un code PIN aléatoire à chaque démarrage",
+    "currentPin": "Code PIN actuel",
+    "localUrl": "URL réseau local",
+    "tailscaleUrl": "URL Tailscale",
+    "showQrCode": "Afficher le code QR",
+    "qrCodeTitle": "Connecter via code QR",
+    "securityWarning": "Avis de sécurité",
+    "securityWarningDescription": "Activez l'accès réseau uniquement sur des réseaux de confiance. L'authentification par code PIN est requise pour toutes les connexions à distance."
   }
 }

@@ -42,6 +42,7 @@ import { setupErrorLogging } from './app-logger';
 import { initSentryMain } from './sentry';
 import { preWarmToolCache } from './cli-tool-manager';
 import { initializeClaudeProfileManager } from './claude-profile-manager';
+import { HttpServerManager } from './http-server';
 import type { AppSettings } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -128,6 +129,15 @@ function getIconPath(): string {
 let mainWindow: BrowserWindow | null = null;
 let agentManager: AgentManager | null = null;
 let terminalManager: TerminalManager | null = null;
+let httpServer: HttpServerManager | null = null;
+
+/**
+ * Get the HTTP server instance
+ * @returns HTTP server instance or null if not initialized
+ */
+export function getHttpServer(): HttpServerManager | null {
+  return httpServer;
+}
 
 function createWindow(): void {
   // Get the primary display's work area (accounts for taskbar, dock, etc.)
@@ -370,6 +380,13 @@ app.whenReady().then(() => {
   // Create window
   createWindow();
 
+  // Initialize HTTP server
+  httpServer = new HttpServerManager();
+  const settings = loadSettingsSync();
+  httpServer.start(settings).catch((error) => {
+    console.error('[main] Failed to start HTTP server:', error);
+  });
+
   // Pre-warm CLI tool cache in background (non-blocking)
   // This ensures CLI detection is done before user needs it
   // Include all commonly used tools to prevent sync blocking on first use
@@ -462,6 +479,12 @@ app.on('before-quit', async () => {
   const usageMonitor = getUsageMonitor();
   usageMonitor.stop();
   console.warn('[main] Usage monitor stopped');
+
+  // Stop HTTP server
+  if (httpServer) {
+    await httpServer.stop();
+    console.warn('[main] HTTP server stopped');
+  }
 
   // Kill all running agent processes
   if (agentManager) {

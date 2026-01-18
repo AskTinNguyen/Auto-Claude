@@ -52,6 +52,7 @@ import { AppUpdateNotification } from './components/AppUpdateNotification';
 import { ProactiveSwapListener } from './components/ProactiveSwapListener';
 import { GitHubSetupModal } from './components/GitHubSetupModal';
 import { PinEntryModal } from './components/auth';
+import { useNeedsAuth } from './stores/lan-auth-store';
 import { useProjectStore, loadProjects, addProject, initializeProject, removeProject } from './stores/project-store';
 import { useTaskStore, loadTasks } from './stores/task-store';
 import { useSettingsStore, loadSettings, loadProfiles } from './stores/settings-store';
@@ -105,6 +106,9 @@ export function App() {
   // Load global terminal output listeners to buffer output across project switches
   // This ensures terminal output is captured even when the terminal component is not rendered
   useGlobalTerminalListeners();
+
+  // LAN authentication state
+  const needsAuth = useNeedsAuth();
 
   // Stores
   const projects = useProjectStore((state) => state.projects);
@@ -763,6 +767,8 @@ export function App() {
     <ViewStateProvider>
       <TooltipProvider>
         <ProactiveSwapListener />
+        {/* PIN Entry Modal - shows when LAN auth is required */}
+        {needsAuth && <PinEntryModal />}
       <div className="flex h-screen bg-background">
         {/* Sidebar */}
         <Sidebar
@@ -1090,9 +1096,6 @@ export function App() {
 
         {/* Global Download Indicator - shows Ollama model download progress */}
         <GlobalDownloadIndicator />
-
-        {/* PIN Entry Modal - shows when LAN auth is required */}
-        <PinEntryModal />
 
         {/* Toast notifications */}
         <Toaster />

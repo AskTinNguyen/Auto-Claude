@@ -45,6 +45,14 @@
       "title": "Notifications",
       "description": "Alert preferences"
     },
+    "tts": {
+      "title": "Text-to-Speech",
+      "description": "Voice synthesis settings"
+    },
+    "lan": {
+      "title": "LAN Access",
+      "description": "Remote device access settings"
+    },
     "debug": {
       "title": "Debug & Logs",
       "description": "Troubleshooting tools"
@@ -591,5 +599,20 @@
       "openai": "This looks like an OpenAI API. You'll need an API key.",
       "createOpenaiKey": "Create OpenAI API Key"
     }
+  },
+  "lan": {
+    "title": "LAN Access",
+    "enableLan": "Enable LAN Access",
+    "enableLanDescription": "Allow access from devices on your local network",
+    "staticPin": "Static PIN (optional)",
+    "pinPlaceholder": "Enter 4-digit PIN (or leave empty for random)",
+    "pinHint": "Leave empty to generate a random PIN on each startup",
+    "currentPin": "Current PIN",
+    "localUrl": "Local Network URL",
+    "tailscaleUrl": "Tailscale URL",
+    "showQrCode": "Show QR Code",
+    "qrCodeTitle": "Connect via QR Code",
+    "securityWarning": "Security Notice",
+    "securityWarningDescription": "Only enable LAN access on trusted networks. PIN authentication is required for all remote connections."
   }
 }
