@@ -12,6 +12,7 @@ from .validators import (
     ContextValidator,
     ImplementationPlanValidator,
     PrereqsValidator,
+    QualityValidator,
     SpecDocumentValidator,
 )
 
@@ -19,19 +20,22 @@ from .validators import (
 class SpecValidator:
     """Validates spec outputs at each checkpoint."""
 
-    def __init__(self, spec_dir: Path):
+    def __init__(self, spec_dir: Path, min_quality_score: float = 70.0):
         """Initialize the spec validator.
 
         Args:
             spec_dir: Path to the spec directory
+            min_quality_score: Minimum quality score required (default: 70.0)
         """
         self.spec_dir = Path(spec_dir)
+        self.min_quality_score = min_quality_score
 
         # Initialize individual validators
         self._prereqs_validator = PrereqsValidator(self.spec_dir)
         self._context_validator = ContextValidator(self.spec_dir)
         self._spec_document_validator = SpecDocumentValidator(self.spec_dir)
         self._implementation_plan_validator = ImplementationPlanValidator(self.spec_dir)
+        self._quality_validator = QualityValidator(self.spec_dir, min_quality_score)
 
     def validate_all(self) -> list[ValidationResult]:
         """Run all validations.
@@ -44,6 +48,7 @@ class SpecValidator:
             self.validate_context(),
             self.validate_spec_document(),
             self.validate_implementation_plan(),
+            self.validate_quality(),
         ]
         return results
 
@@ -78,3 +83,11 @@ class SpecValidator:
             ValidationResult for implementation plan checkpoint
         """
         return self._implementation_plan_validator.validate()
+
+    def validate_quality(self) -> ValidationResult:
+        """Validate spec quality using Ralph's scoring system.
+
+        Returns:
+            ValidationResult for quality checkpoint
+        """
+        return self._quality_validator.validate()

@@ -198,6 +198,61 @@ The project root is the parent of auto-claude/. Implement code in the project ro
     return spec_context + prompt
 
 
+def get_planner_prompt_ralph(spec_dir: Path) -> str:
+    """
+    Load the Ralph-enhanced planner agent prompt with spec path injected.
+    Uses Ralph's planning methodology with Scope/Acceptance/Verification format.
+
+    This planner differs from the default by:
+    - Using Ralph's task format (Scope, Acceptance, Verification)
+    - Requiring upfront code pattern documentation
+    - Creating optional PLAN.md for human readability
+    - Supporting frontend-design skill routing
+    - Emphasizing concrete, runnable verification commands
+
+    Args:
+        spec_dir: Directory containing the spec.md file
+
+    Returns:
+        The Ralph planner prompt content with spec path
+    """
+    prompt_file = PROMPTS_DIR / "planner_ralph.md"
+
+    if not prompt_file.exists():
+        raise FileNotFoundError(
+            f"Ralph planner prompt not found at {prompt_file}\n"
+            "Make sure the auto-claude/prompts/planner_ralph.md file exists."
+        )
+
+    prompt = prompt_file.read_text()
+
+    # Inject spec directory information at the beginning
+    spec_context = f"""## SPEC LOCATION
+
+Your spec file is located at: `{spec_dir}/spec.md`
+
+🚨 CRITICAL FILE CREATION INSTRUCTIONS 🚨
+
+You MUST use the Write tool to create these files in the spec directory:
+- `{spec_dir}/implementation_plan.json` - Subtask-based implementation plan (USE WRITE TOOL!)
+- `{spec_dir}/PLAN.md` (optional) - Human-readable markdown plan (USE WRITE TOOL!)
+
+DO NOT just describe what these files should contain. You MUST actually call the Write tool
+with the file path and complete content to create them.
+
+The project root is the parent of auto-claude/. Implement code in the project root, not in the spec directory.
+
+**Additional context files to read:**
+- `{spec_dir}/requirements.json` - Structured user requirements
+- `{spec_dir}/context.json` - Discovered codebase context
+- `{spec_dir}/complexity_assessment.json` - Task complexity analysis (if exists)
+
+---
+
+"""
+    return spec_context + prompt
+
+
 def get_coding_prompt(spec_dir: Path) -> str:
     """
     Load the coding agent prompt with spec path injected.

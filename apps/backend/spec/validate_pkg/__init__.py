@@ -15,5 +15,14 @@ The spec creation process has mandatory checkpoints:
 from .auto_fix import auto_fix_plan
 from .models import ValidationResult
 from .spec_validator import SpecValidator
+from .scoring import RalphSpecScorer, QualityScore, ScoreBreakdown, QualityIssue
 
-__all__ = ["SpecValidator", "ValidationResult", "auto_fix_plan"]
+__all__ = [
+    "SpecValidator",
+    "ValidationResult",
+    "auto_fix_plan",
+    "RalphSpecScorer",
+    "QualityScore",
+    "ScoreBreakdown",
+    "QualityIssue"
+]

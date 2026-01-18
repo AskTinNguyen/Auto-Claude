@@ -5,6 +5,7 @@ Planning and Validation Phase Implementations
 Phases for implementation planning and final validation.
 """
 
+import os
 from typing import TYPE_CHECKING
 
 from task_logger import LogEntryType, LogPhase
@@ -18,6 +19,18 @@ if TYPE_CHECKING:
 
 class PlanningPhaseMixin:
     """Mixin for planning and validation phase methods."""
+
+    def _get_planner_template(self) -> str:
+        """
+        Get the planner template to use based on PLANNER_TEMPLATE env var.
+
+        Returns:
+            The prompt file name to use ("planner.md" or "planner_ralph.md")
+        """
+        template = os.getenv("PLANNER_TEMPLATE", "default").lower()
+        if template == "ralph":
+            return "planner_ralph.md"
+        return "planner.md"
 
     async def phase_planning(self) -> PhaseResult:
         """Create the implementation plan."""
@@ -66,15 +79,19 @@ class PlanningPhaseMixin:
                         return PhaseResult("planning", True, [str(plan_file)], [], 0)
                 errors.append(f"Script output invalid: {result.errors}")
 
-        # Fall back to agent
-        self.ui.print_status("Falling back to planner agent...", "progress")
+        # Fall back to agent with selected template
+        planner_template = self._get_planner_template()
+        template_name = "Ralph" if planner_template == "planner_ralph.md" else "default"
+        self.ui.print_status(
+            f"Falling back to planner agent ({template_name} template)...", "progress"
+        )
         for attempt in range(MAX_RETRIES):
             self.ui.print_status(
                 f"Running planner agent (attempt {attempt + 1})...", "progress"
             )
 
             success, output = await self.run_agent_fn(
-                "planner.md",
+                planner_template,
                 phase_name="planning",
             )
 

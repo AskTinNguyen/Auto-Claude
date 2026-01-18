@@ -6,6 +6,7 @@ Phases for spec document creation and quality assurance.
 """
 
 import json
+import os
 from typing import TYPE_CHECKING
 
 from .. import validator, writer
@@ -15,8 +16,58 @@ if TYPE_CHECKING:
     pass
 
 
+def get_spec_template() -> str:
+    """
+    Get the spec template to use (default or ralph).
+
+    Returns:
+        Template name: 'default' or 'ralph'
+    """
+    template = os.getenv("SPEC_TEMPLATE", "default").lower()
+    if template not in ("default", "ralph"):
+        return "default"
+    return template
+
+
 class SpecPhaseMixin:
     """Mixin for spec writing and critique phase methods."""
+
+    async def _generate_boundaries_context(self) -> str:
+        """
+        Generate permission boundaries context for Ralph template.
+
+        Returns:
+            Formatted context string with boundaries
+        """
+        from ..permissions.models import PermissionBoundary, detect_project_type
+
+        # Detect project type
+        project_type = detect_project_type(self.project_dir)
+
+        # Generate boundaries from project type
+        boundaries = PermissionBoundary.from_project_type(project_type)
+
+        # Save boundaries to spec directory
+        boundaries_file = self.spec_dir / "boundaries.json"
+        boundaries_file.write_text(json.dumps(boundaries.to_dict(), indent=2))
+
+        # Format as context for spec writer
+        context = f"""
+## PERMISSION BOUNDARIES (Three-Tier System)
+
+Detected project type: **{project_type}**
+
+The following permission boundaries have been pre-generated for this project.
+Include these in the spec.md under the "Boundaries" section.
+
+{boundaries.to_markdown()}
+
+**Boundaries saved to**: {boundaries_file}
+
+**IMPORTANT**: You can adjust these boundaries based on the specific task requirements,
+but ensure each tier maintains at least 3 items.
+"""
+        return context
 
     async def phase_quick_spec(self) -> PhaseResult:
         """Quick spec for simple tasks - combines context and spec in one step."""
@@ -80,14 +131,25 @@ Create:
                 "spec.md exists but has issues, regenerating...", "warning"
             )
 
+        # Determine which spec template to use
+        template = get_spec_template()
+        prompt_file = "spec_writer_ralph.md" if template == "ralph" else "spec_writer.md"
+
+        # For Ralph template, generate permission boundaries
+        boundaries_context = ""
+        if template == "ralph":
+            boundaries_context = await self._generate_boundaries_context()
+
         errors = []
         for attempt in range(MAX_RETRIES):
             self.ui.print_status(
-                f"Running spec writer (attempt {attempt + 1})...", "progress"
+                f"Running spec writer (template={template}, attempt {attempt + 1})...",
+                "progress",
             )
 
             success, output = await self.run_agent_fn(
-                "spec_writer.md",
+                prompt_file,
+                additional_context=boundaries_context,
                 phase_name="spec_writing",
             )
 

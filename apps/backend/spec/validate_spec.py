@@ -11,7 +11,9 @@ Usage:
     python auto-claude/validate_spec.py --spec-dir auto-claude/specs/001-feature/ --checkpoint context
     python auto-claude/validate_spec.py --spec-dir auto-claude/specs/001-feature/ --checkpoint spec
     python auto-claude/validate_spec.py --spec-dir auto-claude/specs/001-feature/ --checkpoint plan
+    python auto-claude/validate_spec.py --spec-dir auto-claude/specs/001-feature/ --checkpoint quality
     python auto-claude/validate_spec.py --spec-dir auto-claude/specs/001-feature/ --checkpoint all
+    python auto-claude/validate_spec.py --spec-dir auto-claude/specs/001-feature/ --checkpoint quality --min-score 80
 """
 
 import argparse
@@ -33,7 +35,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--checkpoint",
-        choices=["prereqs", "context", "spec", "plan", "all"],
+        choices=["prereqs", "context", "spec", "plan", "quality", "all"],
         default="all",
         help="Which checkpoint to validate",
     )
@@ -47,10 +49,16 @@ def main() -> None:
         action="store_true",
         help="Output results as JSON",
     )
+    parser.add_argument(
+        "--min-score",
+        type=float,
+        default=70.0,
+        help="Minimum quality score required to pass (default: 70.0)",
+    )
 
     args = parser.parse_args()
 
-    validator = SpecValidator(args.spec_dir)
+    validator = SpecValidator(args.spec_dir, min_quality_score=args.min_score)
 
     if args.auto_fix:
         auto_fix_plan(args.spec_dir)
@@ -66,6 +74,8 @@ def main() -> None:
         results = [validator.validate_spec_document()]
     elif args.checkpoint == "plan":
         results = [validator.validate_implementation_plan()]
+    elif args.checkpoint == "quality":
+        results = [validator.validate_quality()]
 
     # Output
     all_valid = all(r.valid for r in results)
