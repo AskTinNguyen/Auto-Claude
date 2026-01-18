@@ -74,6 +74,10 @@ python spec_runner.py --task "Add user authentication"
 # Force complexity level (simple/standard/complex)
 python spec_runner.py --task "Fix button" --complexity simple
 
+# Use Ralph-enhanced spec template (with permission boundaries)
+# Set SPEC_TEMPLATE=ralph in .env first
+python spec_runner.py --task "Add user authentication"
+
 # Run autonomous build
 python run.py --spec 001
 
@@ -211,9 +215,21 @@ See [RELEASE.md](RELEASE.md) for detailed release process documentation.
 | qa_fixer.md | Fixes QA-reported issues |
 | spec_gatherer.md | Collects user requirements |
 | spec_researcher.md | Validates external integrations |
-| spec_writer.md | Creates spec.md document |
+| spec_writer.md | Creates spec.md document (default template) |
+| spec_writer_ralph.md | Creates spec.md with Ralph-enhanced template |
 | spec_critic.md | Self-critique using ultrathink |
 | complexity_assessor.md | AI-based complexity assessment |
+
+**Spec Template Selection:**
+- Set `SPEC_TEMPLATE=default` for standard Auto-Claude spec format (project-based)
+- Set `SPEC_TEMPLATE=ralph` for Ralph-enhanced spec with three-tier permission boundaries
+
+Ralph template includes:
+- Three-tier permission system (Always Do / Ask First / Never Do)
+- Project-type-specific boundaries (auto-detected from project structure)
+- Enhanced quality scoring (0-100 with A-F grades)
+- Concrete, verifiable user stories with acceptance criteria
+- See `apps/backend/spec/permissions/` for implementation details
 
 ### Spec Directory Structure
 
@@ -224,6 +240,7 @@ Each spec in `.auto-claude/specs/XXX-name/` contains:
 - `implementation_plan.json` - Subtask-based plan with status tracking
 - `qa_report.md` - QA validation results
 - `QA_FIX_REQUEST.md` - Issues to fix (when rejected)
+- `boundaries.json` - Permission boundaries (Ralph template only)
 
 ### Branching & Worktree Strategy
 
