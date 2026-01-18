@@ -2094,3 +2094,85 @@ async def _run_parallel_merges(
     )
 
     return final_results
+
+
+def _record_merge_completion(
+    project_dir: Path,
+    spec_name: str,
+    resolved_files: list[str],
+    stats: dict,
+) -> None:
+    """
+    Record merge completion event to persistent storage.
+
+    This function is called after a successful merge to track merge
+    metadata including files changed, conflicts resolved, and merge
+    strategy used. This data is used for analytics and displaying
+    merge history in the UI.
+
+    Args:
+        project_dir: Root directory of the project
+        spec_name: Name of the spec that was merged
+        resolved_files: List of file paths that were successfully merged
+        stats: Dictionary containing merge statistics with keys:
+            - conflicts_resolved: Number of conflicts resolved
+            - ai_assisted: Number of files merged with AI assistance
+            - auto_merged: Number of files auto-merged without AI
+            - git_conflicts: Number of git merge conflicts encountered
+            - merge_strategy: Strategy used ('fast-forward', '3-way', 'ai-assisted', 'manual')
+            - duration_seconds: Optional merge duration in seconds
+    """
+    try:
+        debug(
+            MODULE,
+            f"Recording merge completion for {spec_name}",
+            resolved_files_count=len(resolved_files),
+        )
+
+        # Import merge completion utilities
+        from core.workspace.merge_completion import (
+            MergeCompletionStorage,
+            create_merge_completion,
+        )
+
+        # Determine merge strategy based on stats
+        merge_strategy = "3-way"
+        if stats.get("ai_assisted", 0) > 0:
+            merge_strategy = "ai-assisted"
+        elif stats.get("auto_merged", 0) > 0:
+            merge_strategy = "3-way"
+        elif stats.get("conflicts_resolved", 0) == 0:
+            merge_strategy = "fast-forward"
+
+        # Create merge completion record
+        merge_record = create_merge_completion(
+            spec_name=spec_name,
+            resolved_files=resolved_files,
+            stats={
+                "conflicts_resolved": stats.get("conflicts_resolved", 0),
+                "ai_assisted_count": stats.get("ai_assisted", 0),
+                "auto_merged_count": stats.get("auto_merged", 0),
+                "git_conflicts": stats.get("git_conflicts", 0),
+                "merge_strategy": merge_strategy,
+                "duration_seconds": stats.get("duration_seconds"),
+            },
+            success=True,
+        )
+
+        # Persist to storage
+        storage = MergeCompletionStorage(project_dir=project_dir)
+        storage.record_merge(merge_record)
+
+        debug_success(
+            MODULE,
+            f"Merge completion recorded for {spec_name}",
+            merge_id=merge_record.merge_id,
+        )
+
+    except Exception as e:
+        # Log error but don't fail the merge
+        debug_error(
+            MODULE,
+            f"Failed to record merge completion for {spec_name}: {e}",
+        )
+        # Non-critical error - merge already succeeded, just tracking failed
