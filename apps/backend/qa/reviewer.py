@@ -16,6 +16,7 @@ from pathlib import Path
 from agents.memory_manager import get_graphiti_context, save_session_memory
 from claude_agent_sdk import ClaudeSDKClient
 from debug import debug, debug_detailed, debug_error, debug_section, debug_success
+from integrations.tts import get_tts_manager
 from prompts_pkg import get_qa_reviewer_prompt
 from security.tool_input_validator import get_safe_tool_input
 from task_logger import (
@@ -337,6 +338,11 @@ This is attempt {previous_error.get("consecutive_errors", 1) + 1}. If you fail t
 
         if status and status.get("status") == "approved":
             debug_success("qa_reviewer", "QA APPROVED")
+
+            # Announce QA approval via TTS
+            tts_manager = get_tts_manager()
+            tts_manager.speak_qa_result(passed=True)
+
             qa_discoveries["patterns_found"].append(
                 f"QA session {qa_session}: All acceptance criteria validated successfully"
             )
@@ -353,8 +359,13 @@ This is attempt {previous_error.get("consecutive_errors", 1) + 1}. If you fail t
             return "approved", response_text
         elif status and status.get("status") == "rejected":
             debug_error("qa_reviewer", "QA REJECTED")
-            # Extract issues found for memory
+
+            # Announce QA rejection via TTS
+            tts_manager = get_tts_manager()
             issues = status.get("issues_found", [])
+            tts_manager.speak_qa_result(passed=False, issue_count=len(issues))
+
+            # Extract issues found for memory
             for issue in issues:
                 qa_discoveries["gotchas_encountered"].append(
                     f"QA Issue ({issue.get('type', 'unknown')}): {issue.get('title', 'No title')} at {issue.get('location', 'unknown')}"

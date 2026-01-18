@@ -12,6 +12,7 @@ from pathlib import Path
 
 from core.client import create_client
 from debug import debug, debug_error, debug_section, debug_success, debug_warning
+from integrations.tts import get_tts_manager
 from linear_updater import (
     LinearTaskState,
     is_linear_enabled,
@@ -103,6 +104,10 @@ async def run_qa_validation_loop(
     print("  QA VALIDATION LOOP")
     print("  Self-validating quality assurance")
     print("=" * 70)
+
+    # Get TTS manager for announcements
+    tts_manager = get_tts_manager()
+    tts_manager.speak_phase("Quality Assurance", "Starting validation")
 
     # Initialize task logger for the validation phase
     task_logger = get_task_logger(spec_dir)

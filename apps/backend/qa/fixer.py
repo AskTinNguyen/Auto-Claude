@@ -15,6 +15,7 @@ from pathlib import Path
 from agents.memory_manager import get_graphiti_context, save_session_memory
 from claude_agent_sdk import ClaudeSDKClient
 from debug import debug, debug_detailed, debug_error, debug_section, debug_success
+from integrations.tts import get_tts_manager
 from security.tool_input_validator import get_safe_tool_input
 from task_logger import (
     LogEntryType,
@@ -85,6 +86,10 @@ async def run_qa_fixer_session(
     print(f"  QA FIXER SESSION {fix_session}")
     print("  Applying fixes from QA_FIX_REQUEST.md...")
     print(f"{'=' * 70}\n")
+
+    # Announce QA fixer starting via TTS
+    tts_manager = get_tts_manager()
+    tts_manager.speak("Starting quality assurance fixes", filter_content=False)
 
     # Get task logger for streaming markers
     task_logger = get_task_logger(spec_dir)

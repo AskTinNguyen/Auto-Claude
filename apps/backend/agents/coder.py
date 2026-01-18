@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 from core.client import create_client
+from integrations.tts import get_tts_manager
 from linear_updater import (
     LinearTaskState,
     is_linear_enabled,
@@ -106,6 +107,13 @@ async def run_autonomous_agent(
     # Initialize task logger for persistent logging
     task_logger = get_task_logger(spec_dir)
 
+    # Initialize TTS manager for voice feedback
+    tts_manager = get_tts_manager()
+    if tts_manager.is_enabled():
+        print_status("TTS enabled", "info")
+        status_info = tts_manager.get_status()
+        print_key_value("Provider", status_info.get("active_provider", "none"))
+
     # Debug: Print memory system status at startup
     debug_memory_system_status()
 
@@ -175,6 +183,9 @@ async def run_autonomous_agent(
         emit_phase(ExecutionPhase.PLANNING, "Creating implementation plan")
         is_planning_phase = True
         current_log_phase = LogPhase.PLANNING
+
+        # Announce planning phase via TTS
+        tts_manager.speak_phase("Planning", "Creating implementation plan")
 
         # Start planning phase in task logger
         if task_logger:
@@ -323,6 +334,10 @@ async def run_autonomous_agent(
                 is_planning_phase = False
                 current_log_phase = LogPhase.CODING
                 emit_phase(ExecutionPhase.CODING, "Starting implementation")
+
+                # Announce coding phase via TTS
+                tts_manager.speak_phase("Coding", "Starting implementation")
+
                 if task_logger:
                     task_logger.end_phase(
                         LogPhase.PLANNING,
@@ -383,6 +398,9 @@ async def run_autonomous_agent(
                 print_status(f"Previous attempts: {attempt_count}", "warning")
             print()
 
+            # Announce subtask start via TTS
+            tts_manager.speak_subtask_start(next_subtask.get("description", subtask_id))
+
         # Set subtask info in logger
         if task_logger and subtask_id:
             task_logger.set_subtask(subtask_id)
@@ -391,7 +409,14 @@ async def run_autonomous_agent(
         # Run session with async context manager
         async with client:
             status, response = await run_agent_session(
-                client, prompt, spec_dir, verbose, phase=current_log_phase
+                client=client,
+                message=prompt,
+                spec_dir=spec_dir,
+                verbose=verbose,
+                phase=current_log_phase,
+                session_id=iteration,
+                subtask_id=subtask_id,
+                model=phase_model,
             )
 
         plan_validated = False
@@ -482,6 +507,9 @@ async def run_autonomous_agent(
             # QA loop will emit COMPLETE after actual approval
             print_build_complete_banner(spec_dir)
             status_manager.update(state=BuildState.COMPLETE)
+
+            # Announce build completion via TTS
+            tts_manager.speak_build_complete(success=True)
 
             if task_logger:
                 task_logger.end_phase(
