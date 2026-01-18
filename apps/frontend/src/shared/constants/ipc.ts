@@ -524,5 +524,24 @@ export const IPC_CHANNELS = {
   // Sentry error reporting
   SENTRY_STATE_CHANGED: 'sentry:state-changed',  // Notify main process when setting changes
   GET_SENTRY_DSN: 'sentry:get-dsn',              // Get DSN from main process (env var)
-  GET_SENTRY_CONFIG: 'sentry:get-config'         // Get full Sentry config (DSN + sample rates)
+  GET_SENTRY_CONFIG: 'sentry:get-config',        // Get full Sentry config (DSN + sample rates)
+
+  // TTS (Text-to-Speech) operations
+  TTS_GET_STATUS: 'tts:getStatus',               // Get TTS manager status
+  TTS_GET_VOICES: 'tts:getVoices',               // List available voices by provider
+  TTS_TEST_VOICE: 'tts:testVoice',               // Test a voice by speaking text
+
+  // ScratchPad operations
+  SCRATCHPAD_NOTES_LOAD: 'scratchpad:notes:load',
+  SCRATCHPAD_NOTES_SAVE: 'scratchpad:notes:save',
+  SCRATCHPAD_SNIPPETS_LIST: 'scratchpad:snippets:list',
+  SCRATCHPAD_SNIPPETS_CREATE: 'scratchpad:snippets:create',
+  SCRATCHPAD_SNIPPETS_GET: 'scratchpad:snippets:get',
+  SCRATCHPAD_SNIPPETS_DELETE: 'scratchpad:snippets:delete',
+  SCRATCHPAD_TEMPLATES_LIST: 'scratchpad:templates:list',
+  SCRATCHPAD_TEMPLATES_CREATE: 'scratchpad:templates:create',
+  SCRATCHPAD_TEMPLATES_UPDATE: 'scratchpad:templates:update',
+  SCRATCHPAD_TEMPLATES_DELETE: 'scratchpad:templates:delete',
+  SCRATCHPAD_TEMPLATES_CLONE: 'scratchpad:templates:clone',
+  SCRATCHPAD_TEMPLATES_GET: 'scratchpad:templates:get'
 } as const;

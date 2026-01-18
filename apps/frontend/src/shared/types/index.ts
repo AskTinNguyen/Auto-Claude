@@ -17,6 +17,8 @@ export * from './roadmap';
 export * from './integrations';
 export * from './app-update';
 export * from './cli';
+export * from './scratchpad';
+export * from './tts';
 
 // IPC types (must be last to use types from other modules)
 export * from './ipc';
