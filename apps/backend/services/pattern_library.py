@@ -7,7 +7,7 @@ Service for managing code patterns with CRUD operations, categorization, and ana
 Integrates with the memory system to store and retrieve reusable code patterns.
 
 Usage:
-    from services.pattern_library import PatternLibrary
+    from services.pattern_library import PatternLibrary, get_pattern_analytics
 
     lib = PatternLibrary(project_dir)
 
@@ -26,6 +26,17 @@ Usage:
 
     # Get all patterns
     all_patterns = lib.get_all_patterns()
+
+    # Track pattern usage
+    lib.record_pattern_usage(pattern_id, success=True)
+
+    # Get analytics
+    popular = lib.get_popular_patterns(limit=5)
+    trending = lib.get_trending_patterns(days=30)
+    analytics = lib.get_library_analytics()
+
+    # Convenience function for analytics
+    analytics = get_pattern_analytics(project_dir)
 """
 
 import json
@@ -295,6 +306,201 @@ class PatternLibrary:
         patterns = self._load_patterns()
         return len(patterns)
 
+    def record_pattern_usage(self, pattern_id: str, success: bool = True) -> bool:
+        """
+        Record usage of a pattern and update analytics.
+
+        Args:
+            pattern_id: ID of the pattern that was used
+            success: Whether the pattern was successfully applied
+
+        Returns:
+            True if recorded successfully, False if pattern not found
+        """
+        pattern = self.get_pattern(pattern_id)
+        if pattern is None:
+            return False
+
+        # Update usage count
+        pattern.metadata.usage_count += 1
+
+        # Update last used timestamp
+        pattern.metadata.last_used = datetime.utcnow().isoformat()
+
+        # Update success rate using exponential moving average
+        # This gives more weight to recent usage
+        alpha = 0.2  # Smoothing factor
+        current_success = 1.0 if success else 0.0
+        pattern.metadata.success_rate = (
+            alpha * current_success + (1 - alpha) * pattern.metadata.success_rate
+        )
+
+        # Save the updated pattern
+        self.update_pattern(pattern_id, pattern)
+        logger.info(
+            f"Recorded usage for pattern {pattern_id}: "
+            f"count={pattern.metadata.usage_count}, "
+            f"success_rate={pattern.metadata.success_rate:.2f}"
+        )
+        return True
+
+    def get_popular_patterns(self, limit: int = 10) -> list[CodePattern]:
+        """
+        Get the most popular patterns by usage count.
+
+        Args:
+            limit: Maximum number of patterns to return
+
+        Returns:
+            List of CodePattern instances sorted by usage count (descending)
+        """
+        all_patterns = self.get_all_patterns()
+        sorted_patterns = sorted(
+            all_patterns,
+            key=lambda p: p.metadata.usage_count,
+            reverse=True
+        )
+        return sorted_patterns[:limit]
+
+    def get_successful_patterns(self, min_usage: int = 5, limit: int = 10) -> list[CodePattern]:
+        """
+        Get patterns with highest success rates.
+
+        Args:
+            min_usage: Minimum usage count to be considered (filters out patterns with too few uses)
+            limit: Maximum number of patterns to return
+
+        Returns:
+            List of CodePattern instances sorted by success rate (descending)
+        """
+        all_patterns = self.get_all_patterns()
+        # Filter patterns with minimum usage
+        filtered_patterns = [
+            p for p in all_patterns
+            if p.metadata.usage_count >= min_usage
+        ]
+        sorted_patterns = sorted(
+            filtered_patterns,
+            key=lambda p: p.metadata.success_rate,
+            reverse=True
+        )
+        return sorted_patterns[:limit]
+
+    def get_trending_patterns(self, days: int = 30, limit: int = 10) -> list[CodePattern]:
+        """
+        Get trending patterns (recently used and popular).
+
+        Args:
+            days: Number of days to consider for "recent" usage
+            limit: Maximum number of patterns to return
+
+        Returns:
+            List of CodePattern instances sorted by recent usage and popularity
+        """
+        from datetime import timedelta
+
+        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        all_patterns = self.get_all_patterns()
+        recent_patterns = []
+
+        for pattern in all_patterns:
+            if pattern.metadata.last_used:
+                try:
+                    last_used = datetime.fromisoformat(pattern.metadata.last_used)
+                    if last_used >= cutoff_date:
+                        recent_patterns.append(pattern)
+                except (ValueError, TypeError):
+                    continue
+
+        # Sort by combination of usage count and success rate
+        sorted_patterns = sorted(
+            recent_patterns,
+            key=lambda p: (p.metadata.usage_count * p.metadata.success_rate),
+            reverse=True
+        )
+        return sorted_patterns[:limit]
+
+    def get_pattern_analytics(self, pattern_id: str) -> Optional[dict]:
+        """
+        Get detailed analytics for a specific pattern.
+
+        Args:
+            pattern_id: ID of the pattern
+
+        Returns:
+            Dictionary with analytics data or None if pattern not found
+        """
+        pattern = self.get_pattern(pattern_id)
+        if pattern is None:
+            return None
+
+        return {
+            "pattern_id": pattern.id,
+            "name": pattern.name,
+            "category": pattern.category.value,
+            "usage_count": pattern.metadata.usage_count,
+            "success_rate": pattern.metadata.success_rate,
+            "last_used": pattern.metadata.last_used,
+            "created_at": pattern.metadata.created_at,
+            "updated_at": pattern.metadata.updated_at,
+            "tags": pattern.metadata.tags,
+        }
+
+    def get_library_analytics(self) -> dict:
+        """
+        Get overall library analytics.
+
+        Returns:
+            Dictionary with library-wide statistics
+        """
+        all_patterns = self.get_all_patterns()
+        total_patterns = len(all_patterns)
+
+        if total_patterns == 0:
+            return {
+                "total_patterns": 0,
+                "total_usage": 0,
+                "average_success_rate": 0.0,
+                "patterns_by_category": {},
+                "most_popular_pattern": None,
+                "most_successful_pattern": None,
+            }
+
+        total_usage = sum(p.metadata.usage_count for p in all_patterns)
+        avg_success_rate = sum(p.metadata.success_rate for p in all_patterns) / total_patterns
+
+        # Count patterns by category
+        patterns_by_category = {}
+        for pattern in all_patterns:
+            category = pattern.category.value
+            patterns_by_category[category] = patterns_by_category.get(category, 0) + 1
+
+        # Find most popular pattern
+        most_popular = max(all_patterns, key=lambda p: p.metadata.usage_count)
+
+        # Find most successful pattern (with at least 1 usage)
+        used_patterns = [p for p in all_patterns if p.metadata.usage_count > 0]
+        most_successful = None
+        if used_patterns:
+            most_successful = max(used_patterns, key=lambda p: p.metadata.success_rate)
+
+        return {
+            "total_patterns": total_patterns,
+            "total_usage": total_usage,
+            "average_success_rate": avg_success_rate,
+            "patterns_by_category": patterns_by_category,
+            "most_popular_pattern": {
+                "id": most_popular.id,
+                "name": most_popular.name,
+                "usage_count": most_popular.metadata.usage_count,
+            } if most_popular else None,
+            "most_successful_pattern": {
+                "id": most_successful.id,
+                "name": most_successful.name,
+                "success_rate": most_successful.metadata.success_rate,
+            } if most_successful else None,
+        }
+
 
 def categorize_pattern(
     pattern_type: str,
@@ -480,3 +686,37 @@ def categorize_pattern(
 
     # Default to OTHER if no match
     return PatternCategory.OTHER
+
+
+def get_pattern_analytics(project_dir: str | Path, pattern_id: Optional[str] = None) -> dict:
+    """
+    Get analytics for a specific pattern or the entire library.
+
+    This is a convenience function that creates a PatternLibrary instance
+    and retrieves analytics.
+
+    Args:
+        project_dir: Path to project directory
+        pattern_id: Optional pattern ID to get analytics for. If None, returns library-wide analytics.
+
+    Returns:
+        Dictionary with analytics data
+
+    Example:
+        >>> # Get library-wide analytics
+        >>> analytics = get_pattern_analytics("/path/to/project")
+        >>> print(analytics["total_patterns"])
+
+        >>> # Get analytics for specific pattern
+        >>> analytics = get_pattern_analytics("/path/to/project", "pattern-001")
+        >>> print(analytics["usage_count"])
+    """
+    library = PatternLibrary(project_dir)
+
+    if pattern_id is None:
+        return library.get_library_analytics()
+    else:
+        result = library.get_pattern_analytics(pattern_id)
+        if result is None:
+            raise ValueError(f"Pattern '{pattern_id}' not found")
+        return result
