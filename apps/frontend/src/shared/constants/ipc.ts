@@ -531,6 +531,10 @@ export const IPC_CHANNELS = {
   TTS_GET_VOICES: 'tts:getVoices',               // List available voices by provider
   TTS_TEST_VOICE: 'tts:testVoice',               // Test a voice by speaking text
 
+  // Monitoring operations (cost tracking and heartbeat)
+  MONITORING_GET_COST_METRICS: 'monitoring:getCostMetrics',       // Get cost and token usage metrics
+  MONITORING_CHECK_HEARTBEAT: 'monitoring:checkHeartbeat',        // Check build heartbeat status
+
   // ScratchPad operations
   SCRATCHPAD_NOTES_LOAD: 'scratchpad:notes:load',
   SCRATCHPAD_NOTES_SAVE: 'scratchpad:notes:save',

@@ -37,6 +37,7 @@ import { setupLanHandlers } from './lan-handlers';
 import { registerScratchpadHandlers } from './scratchpad-handlers';
 import { registerRalphHandlers } from './ralph-handlers';
 import { registerTTSHandlers } from './tts-handlers';
+import { registerMonitoringHandlers } from './monitoring-handlers';
 import { notificationService } from '../notification-service';
 
 /**
@@ -134,6 +135,9 @@ export function setupIpcHandlers(
   // TTS (Text-to-Speech) handlers
   registerTTSHandlers(getMainWindow);
 
+  // Monitoring handlers (cost tracking and heartbeat)
+  registerMonitoringHandlers();
+
   console.warn('[IPC] All handler modules registered successfully');
 }
 
@@ -164,5 +168,6 @@ export {
   setupLanHandlers,
   registerScratchpadHandlers,
   registerRalphHandlers,
-  registerTTSHandlers
+  registerTTSHandlers,
+  registerMonitoringHandlers
 };

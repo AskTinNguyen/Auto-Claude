@@ -17,6 +17,7 @@ import { LanAPI, createLanAPI } from './lan-api';
 import { ScratchPadAPI, createScratchPadAPI } from './scratchpad-api';
 import { RalphAPI, createRalphAPI } from './ralph-api';
 import { TTSAPI, createTTSAPI } from './tts-api';
+import { MonitoringAPI, createMonitoringAPI } from './monitoring-api';
 
 export interface ElectronAPI extends
   ProjectAPI,
@@ -36,7 +37,8 @@ export interface ElectronAPI extends
   LanAPI,
   ScratchPadAPI,
   RalphAPI,
-  TTSAPI {
+  TTSAPI,
+  MonitoringAPI {
   github: GitHubAPI;
 }
 
@@ -56,6 +58,7 @@ export const createElectronAPI = (): ElectronAPI => ({
   ...createScratchPadAPI(),
   ...createRalphAPI(),
   ...createTTSAPI(),
+  ...createMonitoringAPI(),
   github: createGitHubAPI()
 });
 
@@ -77,7 +80,8 @@ export {
   createLanAPI,
   createScratchPadAPI,
   createRalphAPI,
-  createTTSAPI
+  createTTSAPI,
+  createMonitoringAPI
 };
 
 export type {
@@ -99,5 +103,6 @@ export type {
   LanAPI,
   ScratchPadAPI,
   RalphAPI,
-  TTSAPI
+  TTSAPI,
+  MonitoringAPI
 };
