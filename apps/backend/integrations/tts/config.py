@@ -9,6 +9,37 @@ from dataclasses import dataclass
 from typing import Optional
 
 
+# Default Piper voice directory
+_PIPER_VOICE_DIR = Path.home() / ".local" / "share" / "piper-voices"
+
+
+def _resolve_piper_voice_name(short_name: str) -> str:
+    """
+    Resolve old-format short voice name to full model name.
+
+    Args:
+        short_name: Short voice name like "ryan", "lessac"
+
+    Returns:
+        Full model name like "en_US-ryan-medium" if found, otherwise returns the input
+    """
+    if not _PIPER_VOICE_DIR.exists():
+        return short_name
+
+    try:
+        # Search for matching .onnx file
+        for onnx_file in _PIPER_VOICE_DIR.glob("*.onnx"):
+            filename = onnx_file.name
+            model_name = filename[:-5]  # Remove .onnx
+            parts = model_name.split('-')
+            if len(parts) >= 2 and parts[1].lower() == short_name.lower():
+                return model_name
+    except Exception:
+        pass
+
+    return short_name
+
+
 @dataclass
 class TTSConfig:
     """Configuration for TTS system."""
@@ -68,6 +99,10 @@ class TTSConfig:
                     with open(voice_config_path, 'r') as f:
                         voice_config = json.load(f)
 
+                    # Enable TTS if autoSpeak is enabled
+                    if voice_config.get("autoSpeak", {}).get("enabled"):
+                        config.enabled = True
+
                     # Override provider if specified in voice config
                     if voice_config.get("voice", {}).get("provider"):
                         config.preferred_provider = voice_config["voice"]["provider"]
@@ -79,6 +114,9 @@ class TTSConfig:
                         # Update provider-specific voice settings
                         if config.preferred_provider == "piper":
                             # Piper voice format is like "en_US-ryan-medium"
+                            # Handle backward compatibility for old short format (e.g., "ryan")
+                            if '-' not in selected_voice:
+                                selected_voice = _resolve_piper_voice_name(selected_voice)
                             config.piper_model = selected_voice
                         elif config.preferred_provider == "macos":
                             # macOS voice is just the name like "Ryan"

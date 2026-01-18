@@ -140,6 +140,60 @@ async function readAutoSpeakConfig(): Promise<{ enabled: boolean; mode: 'short' 
 }
 
 /**
+ * Get the path to the claude-auto-speak config (global Claude Code hook config)
+ */
+function getClaudeAutoSpeakConfigPath(): string {
+  const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+  return path.join(homeDir, '.claude-auto-speak', 'config.json');
+}
+
+/**
+ * Sync voice settings to claude-auto-speak config (for Claude Code hooks)
+ */
+async function syncToClaudeAutoSpeak(enabled: boolean, provider?: string, selectedVoice?: string | null): Promise<void> {
+  const configPath = getClaudeAutoSpeakConfigPath();
+
+  if (!existsSync(configPath)) {
+    debugLog('[TTS-IPC] claude-auto-speak not installed, skipping sync');
+    return;
+  }
+
+  try {
+    const content = await fs.readFile(configPath, 'utf-8');
+    const config = JSON.parse(content);
+
+    config.enabled = enabled;
+
+    if (provider) {
+      if (provider === 'piper') {
+        config.ttsEngine = 'piper';
+        if (selectedVoice) {
+          const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+          const voicePath = path.join(homeDir, '.local', 'share', 'piper-voices', `${selectedVoice}.onnx`);
+          if (existsSync(voicePath)) {
+            config.piperVoice = voicePath;
+          }
+          if (config.multilingual?.voiceByLanguage) {
+            config.multilingual.voiceByLanguage.en = selectedVoice;
+          }
+        }
+      } else if (provider === 'macos') {
+        config.ttsEngine = 'macos';
+        if (selectedVoice) config.voice = selectedVoice;
+      } else if (provider === 'system') {
+        config.ttsEngine = 'system';
+        if (selectedVoice) config.voice = selectedVoice;
+      }
+    }
+
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    debugLog('[TTS-IPC] Synced to claude-auto-speak config');
+  } catch (error) {
+    debugError('[TTS-IPC] Failed to sync to claude-auto-speak:', error);
+  }
+}
+
+/**
  * Write auto-speak configuration to voice-config.json
  */
 async function writeAutoSpeakConfig(enabled: boolean, mode: 'short' | 'full', provider?: string, selectedVoice?: string | null): Promise<void> {
@@ -176,6 +230,9 @@ async function writeAutoSpeakConfig(enabled: boolean, mode: 'short' | 'full', pr
     // Write back to file
     await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
     debugLog('[TTS-IPC] Updated voice-config.json:', config);
+
+    // Also sync to claude-auto-speak config for Claude Code hooks
+    await syncToClaudeAutoSpeak(enabled, provider, selectedVoice);
   } catch (error) {
     debugError('[TTS-IPC] Failed to write voice-config.json:', error);
     throw error;

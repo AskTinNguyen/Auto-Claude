@@ -281,8 +281,12 @@ class PiperProvider:
                 if quality:
                     display_name += f" [{quality}]"
 
+                # Use full model name as ID (e.g., "en_US-ryan-medium")
+                # This is required for Piper's --model argument
+                model_id = filename[:-5]  # Remove .onnx extension
+
                 voice_info = VoiceInfo(
-                    id=voice_id,
+                    id=model_id,
                     name=display_name,
                     language=language or 'unknown',
                     provider='piper',
