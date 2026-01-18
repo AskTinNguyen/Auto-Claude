@@ -814,7 +814,18 @@ export function registerTaskExecutionHandlers(
   ipcMain.handle(
     IPC_CHANNELS.TASK_CHECK_RUNNING,
     async (_, taskId: string): Promise<IPCResult<boolean>> => {
-      const isRunning = agentManager.isRunning(taskId);
+      // Check using task.id first (new behavior after fix)
+      let isRunning = agentManager.isRunning(taskId);
+
+      // Backward compatibility: If not found, check using task.specId
+      // This handles tasks that were started before the fix
+      if (!isRunning) {
+        const { task } = findTaskAndProject(taskId);
+        if (task?.specId) {
+          isRunning = agentManager.isRunning(task.specId);
+        }
+      }
+
       return { success: true, data: isRunning };
     }
   );
