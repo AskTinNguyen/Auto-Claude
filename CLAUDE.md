@@ -85,6 +85,69 @@ python run.py --spec 001
 python run.py --list
 ```
 
+### Execution Flows
+
+Auto-Claude supports two execution flows for building specs:
+
+**Auto-Claude Flow (Default)**
+- ONE persistent agent session across all subtasks
+- Agent maintains context and memory between subtasks
+- Faster iteration with continuous learning
+- Best for cohesive features where context matters
+
+**Ralph CLI Flow**
+- Fresh agent instance per subtask (Ralph CLI's approach)
+- Budget control and permission boundaries
+- Predictable costs per subtask
+- Isolated execution prevents context pollution
+- Best for cost-sensitive work or strict boundaries
+
+**Usage:**
+```bash
+# Use Auto-Claude flow (default)
+python run.py --spec 001
+
+# Use Ralph CLI flow with budget
+python run.py --spec 001 --execution-flow ralph --budget 10.00
+
+# Or use shorthand
+python run.py --spec 001 --flow ralph --budget 10.00
+```
+
+**Configuration:**
+
+Set per-spec in Task Creation Wizard UI, or manually in `task_metadata.json`:
+```json
+{
+  "executionFlow": "ralph",
+  "budget": 10.00
+}
+```
+
+Or set globally via environment variable in `apps/backend/.env`:
+```bash
+EXECUTION_FLOW=ralph  # or auto_claude
+```
+
+**Priority:** CLI argument → task metadata → environment variable → default (auto_claude)
+
+**Ralph CLI Requirements:**
+- Install Ralph CLI: `pip install ralph-cli`
+- Or use local installation at `apps/backend/ralph_cli/`
+- Ralph CLI shares `.auto-claude/` directory with Auto-Claude
+- Both tools read/write the same spec files
+
+**When to use Ralph CLI:**
+- Budget-sensitive projects (set max cost per build)
+- Isolated subtask execution (prevent context bleeding)
+- Permission boundaries (Always Do / Ask First / Never Do)
+- Deterministic, repeatable builds
+
+**When to use Auto-Claude:**
+- Cohesive features requiring context across subtasks
+- Faster development with persistent agent memory
+- Iterative refinement with learning between subtasks
+
 ### Workspace Management
 ```bash
 cd apps/backend

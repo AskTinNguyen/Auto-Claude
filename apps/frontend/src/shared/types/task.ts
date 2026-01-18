@@ -154,6 +154,8 @@ export interface TaskDraft {
   images: ImageAttachment[];
   referencedFiles: ReferencedFile[];
   requireReviewBeforeCoding?: boolean;
+  executionFlow?: 'auto_claude' | 'ralph';
+  budget?: number;
   savedAt: Date;
 }
 
@@ -232,6 +234,10 @@ export interface TaskMetadata {
   isAutoProfile?: boolean;  // True when using Auto (Optimized) profile
   phaseModels?: PhaseModelConfig;  // Per-phase model configuration
   phaseThinking?: PhaseThinkingConfig;  // Per-phase thinking configuration
+
+  // Execution flow configuration
+  executionFlow?: 'auto_claude' | 'ralph';  // Execution flow: auto_claude (persistent session) or ralph (Ralph CLI fresh-instance)
+  budget?: number;  // Budget limit in USD (for Ralph CLI flow)
 
   // Git/Worktree configuration
   baseBranch?: string;  // Override base branch for this task's worktree

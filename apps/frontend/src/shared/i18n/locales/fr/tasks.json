@@ -33,6 +33,9 @@
     "needsRecovery": "Récupération requise",
     "needsResume": "Reprise requise"
   },
+  "badges": {
+    "ralph": "Ralph"
+  },
   "reviewReason": {
     "completed": "Terminé",
     "hasErrors": "Contient des erreurs",
@@ -200,6 +203,25 @@
     "classificationOptional": "Classification (optionnel)",
     "requireReviewLabel": "Exiger une révision humaine avant le codage",
     "requireReviewDescription": "Lorsque activé, vous serez invité à réviser la spécification et le plan d'implémentation avant le début de la phase de codage. Cela vous permet d'approuver, de demander des modifications ou de fournir des commentaires.",
+    "executionFlow": {
+      "label": "Flux d'exécution",
+      "autoClaude": {
+        "label": "Auto-Claude",
+        "badge": "Par défaut",
+        "description": "Session d'agent persistante pour toutes les sous-tâches",
+        "helpText": "Plus rapide et contextuel. L'agent maintient la mémoire à travers les sous-tâches."
+      },
+      "ralph": {
+        "label": "Ralph CLI",
+        "description": "Instance fraîche par sous-tâche avec contrôle budgétaire",
+        "helpText": "Exécution isolée de Ralph CLI avec limites de permissions et budget."
+      }
+    },
+    "budget": {
+      "label": "Limite budgétaire (USD)",
+      "placeholder": "10.00",
+      "helpText": "Coût maximum autorisé pour cette construction (optionnel)"
+    },
     "errors": {
       "descriptionRequired": "Veuillez fournir une description",
       "maxImagesReached": "Maximum de 5 images autorisé",

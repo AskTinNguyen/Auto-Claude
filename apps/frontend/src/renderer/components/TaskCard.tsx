@@ -529,6 +529,13 @@ export const TaskCard = memo(function TaskCard({
                 {task.metadata.securitySeverity} {t('metadata.severity')}
               </Badge>
             )}
+            {/* Ralph execution flow badge */}
+            {task.metadata?.executionFlow === 'ralph' && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 gap-1">
+                <RotateCcw className="h-2.5 w-2.5" />
+                {t('tasks:badges.ralph')}
+              </Badge>
+            )}
           </div>
         )}
 

@@ -12,9 +12,12 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, ChevronDown, ChevronUp, RotateCcw, FolderTree, GitBranch, Info } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, RotateCcw, FolderTree, GitBranch, Info, Layers, RefreshCw } from 'lucide-react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Badge } from './ui/badge';
 import { Combobox, type ComboboxOption } from './ui/combobox';
 import { TaskModalLayout } from './task-form/TaskModalLayout';
 import { TaskFormFields } from './task-form/TaskFormFields';
@@ -117,6 +120,10 @@ export function TaskCreationWizard({
   // Review setting
   const [requireReviewBeforeCoding, setRequireReviewBeforeCoding] = useState(false);
 
+  // Execution flow
+  const [executionFlow, setExecutionFlow] = useState<'auto_claude' | 'ralph'>('auto_claude');
+  const [budget, setBudget] = useState<number | undefined>();
+
   // Draft state
   const [isDraftRestored, setIsDraftRestored] = useState(false);
 
@@ -155,6 +162,8 @@ export function TaskCreationWizard({
         setImages(draft.images);
         setReferencedFiles(draft.referencedFiles ?? []);
         setRequireReviewBeforeCoding(draft.requireReviewBeforeCoding ?? false);
+        setExecutionFlow(draft.executionFlow ?? 'auto_claude');
+        setBudget(draft.budget);
         setIsDraftRestored(true);
 
         if (draft.category || draft.priority || draft.complexity || draft.impact) {
@@ -252,8 +261,10 @@ export function TaskCreationWizard({
     images,
     referencedFiles,
     requireReviewBeforeCoding,
+    executionFlow,
+    budget,
     savedAt: new Date()
-  }), [projectId, title, description, category, priority, complexity, impact, profileId, model, thinkingLevel, phaseModels, phaseThinking, images, referencedFiles, requireReviewBeforeCoding]);
+  }), [projectId, title, description, category, priority, complexity, impact, profileId, model, thinkingLevel, phaseModels, phaseThinking, images, referencedFiles, requireReviewBeforeCoding, executionFlow, budget]);
 
   /**
    * Detect @ mention being typed and show autocomplete
@@ -422,6 +433,8 @@ export function TaskCreationWizard({
       if (images.length > 0) metadata.attachedImages = images;
       if (allReferencedFiles.length > 0) metadata.referencedFiles = allReferencedFiles;
       if (requireReviewBeforeCoding) metadata.requireReviewBeforeCoding = true;
+      if (executionFlow) metadata.executionFlow = executionFlow;
+      if (executionFlow === 'ralph' && budget) metadata.budget = budget;
       // Always include baseBranch - resolve PROJECT_DEFAULT_BRANCH to actual branch name
       // This ensures the backend always knows which branch to use for worktree creation
       if (baseBranch === PROJECT_DEFAULT_BRANCH) {
@@ -662,6 +675,102 @@ export function TaskCreationWizard({
             />
           )}
         </TaskFormFields>
+
+        {/* Execution Flow Selection */}
+        <div className="space-y-2 p-4 rounded-lg border border-border bg-muted/30">
+          <Label className="text-sm font-medium text-foreground">
+            {t('tasks:form.executionFlow.label')}
+          </Label>
+
+          <RadioGroup
+            value={executionFlow}
+            onValueChange={(value) => setExecutionFlow(value as 'auto_claude' | 'ralph')}
+            className="grid grid-cols-2 gap-3"
+          >
+            {/* Auto-Claude Flow */}
+            <div
+              className={cn(
+                'relative flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all',
+                executionFlow === 'auto_claude'
+                  ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                  : 'border-border bg-muted/30 hover:bg-muted/50'
+              )}
+              onClick={() => setExecutionFlow('auto_claude')}
+            >
+              <div className="flex items-center h-4">
+                <RadioGroupItem
+                  value="auto_claude"
+                  id="flow-auto-claude"
+                />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
+                  <Label htmlFor="flow-auto-claude" className="font-medium cursor-pointer">
+                    {t('tasks:form.executionFlow.autoClaude.label')}
+                  </Label>
+                  <Badge variant="secondary" className="text-xs">
+                    {t('tasks:form.executionFlow.autoClaude.badge')}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('tasks:form.executionFlow.autoClaude.description')}
+                </p>
+              </div>
+            </div>
+
+            {/* Ralph CLI Flow */}
+            <div
+              className={cn(
+                'relative flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all',
+                executionFlow === 'ralph'
+                  ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                  : 'border-border bg-muted/30 hover:bg-muted/50'
+              )}
+              onClick={() => setExecutionFlow('ralph')}
+            >
+              <div className="flex items-center h-4">
+                <RadioGroupItem
+                  value="ralph"
+                  id="flow-ralph"
+                />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-primary" />
+                  <Label htmlFor="flow-ralph" className="font-medium cursor-pointer">
+                    {t('tasks:form.executionFlow.ralph.label')}
+                  </Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('tasks:form.executionFlow.ralph.description')}
+                </p>
+              </div>
+            </div>
+          </RadioGroup>
+
+          {/* Budget field (only for Ralph flow) */}
+          {executionFlow === 'ralph' && (
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="budget" className="text-sm">
+                {t('tasks:form.budget.label')}
+              </Label>
+              <Input
+                id="budget"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder={t('tasks:form.budget.placeholder')}
+                value={budget || ''}
+                onChange={(e) => setBudget(e.target.value ? parseFloat(e.target.value) : undefined)}
+                disabled={isCreating}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('tasks:form.budget.helpText')}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Git Options Toggle - unique to creation */}
         <button

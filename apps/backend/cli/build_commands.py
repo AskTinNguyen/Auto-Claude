@@ -61,6 +61,8 @@ def handle_build_command(
     skip_qa: bool,
     force_bypass_approval: bool,
     base_branch: str | None = None,
+    execution_flow: str | None = None,
+    budget: float | None = None,
 ) -> None:
     """
     Handle the main build command.
@@ -77,6 +79,8 @@ def handle_build_command(
         skip_qa: Skip automatic QA validation
         force_bypass_approval: Force bypass approval check
         base_branch: Base branch for worktree creation (default: current branch)
+        execution_flow: Execution flow to use (auto_claude or ralph)
+        budget: Budget limit in USD (for Ralph CLI flow)
     """
     # Lazy imports to avoid loading heavy modules
     from agent import run_autonomous_agent, sync_spec_to_source
@@ -86,7 +90,7 @@ def handle_build_command(
         debug_section,
         debug_success,
     )
-    from phase_config import get_phase_model
+    from phase_config import get_execution_flow, get_phase_model
     from prompts_pkg.prompts import get_base_branch_from_metadata
     from qa_loop import run_qa_validation_loop, should_run_qa
 
@@ -218,7 +222,53 @@ def handle_build_command(
         if localized_spec_dir:
             spec_dir = localized_spec_dir
 
-    # Run the autonomous agent
+    # Determine execution flow (auto_claude or ralph)
+    flow = get_execution_flow(spec_dir, execution_flow)
+
+    # Route to Ralph CLI if configured
+    if flow == "ralph":
+        print_status("Using Ralph CLI (fresh-instance-per-subtask)", "info")
+        from integrations.ralph_cli import RalphCLI
+
+        ralph = RalphCLI(project_dir)
+        try:
+            exit_code = asyncio.run(
+                ralph.build(
+                    spec_name=spec_dir.name,
+                    model=model,
+                    budget=budget,
+                    verbose=verbose,
+                )
+            )
+
+            if exit_code != 0:
+                print_status(
+                    f"Ralph CLI build failed with exit code {exit_code}", "error"
+                )
+                sys.exit(exit_code)
+
+            print_status("Ralph CLI build completed successfully", "success")
+            return
+
+        except FileNotFoundError as e:
+            print_status(str(e), "error")
+            print()
+            print("To install Ralph CLI:")
+            print("  pip install ralph-cli")
+            print()
+            print("Or use local installation by cloning Ralph CLI to:")
+            print("  apps/backend/ralph_cli/")
+            sys.exit(1)
+        except Exception as e:
+            print_status(f"Ralph CLI build error: {e}", "error")
+            if verbose:
+                import traceback
+
+                traceback.print_exc()
+            sys.exit(1)
+
+    # Run the autonomous agent (Auto-Claude flow)
+    print_status("Using Auto-Claude (persistent session)", "info")
     debug_section("run.py", "Starting Build Execution")
     debug(
         "run.py",

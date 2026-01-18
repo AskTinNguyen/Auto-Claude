@@ -256,6 +256,24 @@ Environment Variables:
         help="Base branch for creating worktrees (default: auto-detect or current branch)",
     )
 
+    # Execution flow selection
+    parser.add_argument(
+        "--execution-flow",
+        "--flow",
+        type=str,
+        choices=["auto_claude", "ralph"],
+        default=None,
+        help="Execution flow: 'auto_claude' (default, persistent session) or 'ralph' (Ralph CLI fresh-instance)",
+    )
+
+    # Budget for Ralph CLI
+    parser.add_argument(
+        "--budget",
+        type=float,
+        default=None,
+        help="Budget limit in USD (Ralph CLI only)",
+    )
+
     # Batch task management
     parser.add_argument(
         "--batch-create",
@@ -565,6 +583,8 @@ def _run_cli() -> None:
         skip_qa=args.skip_qa,
         force_bypass_approval=args.force,
         base_branch=args.base_branch,
+        execution_flow=args.execution_flow,
+        budget=args.budget,
     )
 
 

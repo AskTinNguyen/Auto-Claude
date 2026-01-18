@@ -317,3 +317,41 @@ def get_spec_phase_thinking_budget(phase_name: str) -> int | None:
     """
     thinking_level = SPEC_PHASE_THINKING_LEVELS.get(phase_name, "medium")
     return get_thinking_budget(thinking_level)
+
+
+def get_execution_flow(
+    spec_dir: Path,
+    cli_flow: str | None = None,
+) -> str:
+    """
+    Get execution flow (auto_claude or ralph).
+
+    Priority:
+    1. CLI argument
+    2. Task metadata
+    3. Environment variable
+    4. Default ("auto_claude")
+
+    Args:
+        spec_dir: Path to the spec directory
+        cli_flow: Execution flow from CLI argument (optional)
+
+    Returns:
+        Execution flow: "auto_claude" or "ralph"
+    """
+    # CLI argument takes precedence
+    if cli_flow:
+        return cli_flow
+
+    # Load task metadata
+    metadata = load_task_metadata(spec_dir)
+    if metadata and metadata.get("executionFlow"):
+        return metadata["executionFlow"]
+
+    # Check environment variable
+    env_flow = os.environ.get("EXECUTION_FLOW", "").lower()
+    if env_flow in ("auto_claude", "ralph"):
+        return env_flow
+
+    # Default to auto_claude
+    return "auto_claude"

@@ -33,6 +33,9 @@
     "needsRecovery": "Needs Recovery",
     "needsResume": "Needs Resume"
   },
+  "badges": {
+    "ralph": "Ralph"
+  },
   "reviewReason": {
     "completed": "Completed",
     "hasErrors": "Has Errors",
@@ -200,6 +203,25 @@
     "classificationOptional": "Classification (optional)",
     "requireReviewLabel": "Require human review before coding",
     "requireReviewDescription": "When enabled, you'll be prompted to review the spec and implementation plan before the coding phase begins. This allows you to approve, request changes, or provide feedback.",
+    "executionFlow": {
+      "label": "Execution Flow",
+      "autoClaude": {
+        "label": "Auto-Claude",
+        "badge": "Default",
+        "description": "Persistent agent session across all subtasks",
+        "helpText": "Faster and more context-aware. The agent maintains memory across all subtasks."
+      },
+      "ralph": {
+        "label": "Ralph CLI",
+        "description": "Fresh instance per subtask with budget control",
+        "helpText": "Ralph CLI's isolated execution with permission boundaries and budget limits."
+      }
+    },
+    "budget": {
+      "label": "Budget Limit (USD)",
+      "placeholder": "10.00",
+      "helpText": "Maximum cost allowed for this build (optional)"
+    },
     "errors": {
       "descriptionRequired": "Please provide a description",
       "maxImagesReached": "Maximum of 5 images allowed",
