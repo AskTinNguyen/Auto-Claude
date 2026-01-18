@@ -1574,11 +1574,6 @@ def _resolve_git_conflicts_with_ai(
         except Exception as e:
             print(muted(f"    Warning: Could not process {file_path}: {e}"))
 
-    # V2: Record merge completion in Evolution Tracker for future context
-    # TODO: _record_merge_completion not yet implemented - see line 141
-    # if resolved_files:
-    #     _record_merge_completion(project_dir, spec_name, resolved_files)
-
     # Build result - partial success if some files failed but we got others
     result = {
         "success": len(remaining_conflicts) == 0,
@@ -1595,6 +1590,10 @@ def _resolve_git_conflicts_with_ai(
             "lock_files_excluded": len(lock_files_excluded),
         },
     }
+
+    # Record merge completion in Evolution Tracker for future context
+    if resolved_files:
+        _record_merge_completion(project_dir, spec_name, resolved_files, result["stats"])
 
     # Add remaining conflicts if any (for UI to show what needs manual attention)
     if remaining_conflicts:
