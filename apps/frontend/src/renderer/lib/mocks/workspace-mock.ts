@@ -102,5 +102,10 @@ export const workspaceMock = {
         { id: 'system', name: 'System Terminal', path: '', installed: true }
       ]
     }
+  }),
+
+  getMergeHistory: async () => ({
+    success: true,
+    data: []
   })
 };

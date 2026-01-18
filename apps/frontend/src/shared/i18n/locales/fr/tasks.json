@@ -130,6 +130,20 @@
     "selectFile": "Sélectionnez un fichier pour voir son contenu",
     "openInIDE": "Ouvrir dans l'IDE"
   },
+  "mergeHistory": {
+    "tab": "Historique des Fusions",
+    "noMerges": "Aucun historique de fusion",
+    "noMergesHint": "Les événements de fusion apparaîtront ici après la fusion de cette tâche",
+    "mergeSuccessful": "Fusion Réussie",
+    "mergeFailed": "Fusion Échouée",
+    "filesChanged": "Fichiers:",
+    "conflictsResolved": "Conflits:",
+    "aiAssisted": "Assisté par IA:",
+    "autoMerged": "Fusion Auto:",
+    "gitConflicts": "Conflits Git:",
+    "strategy": "Stratégie:",
+    "viewFiles": "Voir les fichiers affectés"
+  },
   "metadata": {
     "severity": "sévérité",
     "pullRequest": "Pull Request"

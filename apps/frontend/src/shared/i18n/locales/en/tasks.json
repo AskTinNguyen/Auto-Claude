@@ -130,6 +130,20 @@
     "selectFile": "Select a file to view its contents",
     "openInIDE": "Open in IDE"
   },
+  "mergeHistory": {
+    "tab": "Merge History",
+    "noMerges": "No merge history yet",
+    "noMergesHint": "Merge events will appear here after merging this task",
+    "mergeSuccessful": "Merge Successful",
+    "mergeFailed": "Merge Failed",
+    "filesChanged": "Files:",
+    "conflictsResolved": "Conflicts:",
+    "aiAssisted": "AI Assisted:",
+    "autoMerged": "Auto Merged:",
+    "gitConflicts": "Git Conflicts:",
+    "strategy": "Strategy:",
+    "viewFiles": "View affected files"
+  },
   "metadata": {
     "severity": "severity",
     "pullRequest": "Pull Request"
