@@ -1,0 +1,171 @@
+/* ============================================================
+   RAMS DESIGN SYSTEM - BEIGE MODE
+   Design Philosophy: Warm hotel elegance. Timeless sophistication.
+   Inspired by Intercontinental Hotel luxury interiors
+   ============================================================ */
+
+/* ========================================
+   Beige Mode Color Variables
+   ======================================== */
+:root[data-theme="beige"] {
+  /* Warm Beige Palette - Hotel luxury tones */
+  --rams-white: #FAF8F5;
+  --rams-gray-50: #F5F2ED;
+  --rams-gray-100: #EDE8E0;
+  --rams-gray-200: #DED7CB;
+  --rams-gray-300: #C9BFB0;
+  --rams-gray-400: #A89C8A;
+  --rams-gray-500: #877968;
+  --rams-gray-600: #6B5F50;
+  --rams-gray-700: #554A3D;
+  --rams-gray-800: #3D342A;
+  --rams-gray-900: #2B241D;
+  --rams-black: #1A1510;
+
+  /* Accent Color - Deep Bronze Gold (hotel elegance) */
+  --rams-accent: #8B6914;
+  --rams-accent-light: #A87C1A;
+  --rams-accent-lighter: #C59020;
+  --rams-accent-dark: #6B520F;
+
+  /* Functional Colors - Warm variants */
+  --rams-success: #6B8E23;
+  --rams-warning: #D4860E;
+  --rams-error: #C1440E;
+  --rams-info: #5B7FA8;
+
+  /* Borders - Warm neutral */
+  --rams-border-color: var(--rams-gray-200);
+  --rams-border-color-dark: var(--rams-gray-300);
+
+  /* Shadows - Warm, soft */
+  --rams-shadow-xs: 0 1px 2px 0 rgba(43, 36, 29, 0.06);
+  --rams-shadow-sm: 0 1px 3px 0 rgba(43, 36, 29, 0.1);
+  --rams-shadow-md: 0 2px 4px 0 rgba(43, 36, 29, 0.12);
+  --rams-shadow-lg: 0 4px 6px -1px rgba(43, 36, 29, 0.15);
+}
+
+/* ========================================
+   Beige Mode Component Overrides
+   ======================================== */
+
+/* Alert Boxes - Warm, elegant tones */
+:root[data-theme="beige"] .rams-alert-error {
+  background: #F9F1ED;
+  border-color: #E5C4B8;
+  border-left-color: #C1440E;
+  color: #7A2B09;
+}
+
+:root[data-theme="beige"] .rams-alert-error strong {
+  color: #5A1F06;
+}
+
+:root[data-theme="beige"] .rams-alert-error code {
+  background: rgba(193, 68, 14, 0.12);
+  color: #7A2B09;
+}
+
+:root[data-theme="beige"] .rams-alert-warning {
+  background: #FBF6ED;
+  border-color: #EDD5A8;
+  border-left-color: #D4860E;
+  color: #7A4E08;
+}
+
+:root[data-theme="beige"] .rams-alert-warning strong {
+  color: #5A3A06;
+}
+
+:root[data-theme="beige"] .rams-alert-warning code {
+  background: rgba(212, 134, 14, 0.12);
+  color: #7A4E08;
+}
+
+:root[data-theme="beige"] .rams-alert-success {
+  background: #F2F5ED;
+  border-color: #CCD9B3;
+  border-left-color: #6B8E23;
+  color: #3D5214;
+}
+
+:root[data-theme="beige"] .rams-alert-success strong {
+  color: #2B3A0F;
+}
+
+:root[data-theme="beige"] .rams-alert-success code {
+  background: rgba(107, 142, 35, 0.12);
+  color: #3D5214;
+}
+
+:root[data-theme="beige"] .rams-alert-info {
+  background: #EFF4F8;
+  border-color: #B8CEDF;
+  border-left-color: #5B7FA8;
+  color: #2E4659;
+}
+
+:root[data-theme="beige"] .rams-alert-info strong {
+  color: #1F3140;
+}
+
+:root[data-theme="beige"] .rams-alert-info code {
+  background: rgba(91, 127, 168, 0.12);
+  color: #2E4659;
+}
+
+/* Info Box - Warm bronze accent */
+:root[data-theme="beige"] .rams-info-box {
+  background: rgba(139, 105, 20, 0.06);
+  border-color: rgba(139, 105, 20, 0.2);
+  border-left-color: var(--rams-accent);
+}
+
+/* Code Blocks - Warm paper tones */
+:root[data-theme="beige"] .rams-code-block {
+  background: var(--rams-gray-50);
+  border-color: var(--rams-gray-200);
+}
+
+:root[data-theme="beige"] .rams-code-header {
+  background: var(--rams-gray-100);
+  border-bottom-color: var(--rams-gray-200);
+}
+
+:root[data-theme="beige"] .rams-code-inline {
+  background: var(--rams-gray-100);
+  border-color: var(--rams-gray-200);
+  color: var(--rams-accent-dark);
+}
+
+/* Navigation - Bronze active state */
+:root[data-theme="beige"] .rams-nav-link.active {
+  background: rgba(139, 105, 20, 0.08);
+  border-left-color: var(--rams-accent);
+  color: var(--rams-accent);
+}
+
+/* Hover states - Warm glow */
+:root[data-theme="beige"] .rams-feature-card:hover,
+:root[data-theme="beige"] .rams-page-nav-card:hover {
+  border-color: var(--rams-accent);
+  box-shadow: 0 0 0 1px rgba(139, 105, 20, 0.2), var(--rams-shadow-sm);
+}
+
+/* Pills - Bronze accent */
+:root[data-theme="beige"] .rams-pill.active {
+  background: var(--rams-accent);
+  color: var(--rams-white);
+}
+
+/* Typography - Enhanced warmth */
+:root[data-theme="beige"] .rams-page {
+  color: var(--rams-gray-900);
+  background: var(--rams-white);
+}
+
+/* Logo mark - Warm mode variant */
+:root[data-theme="beige"] .rams-logo-mark {
+  background-image: url('/ralph-logo.png');
+  filter: sepia(0.15) brightness(0.98);
+}

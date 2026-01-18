@@ -1,0 +1,158 @@
+/* ============================================================
+   RAMS DESIGN SYSTEM - DARK MODE
+   Design Philosophy: Less but better. Precision in darkness.
+   High contrast for accessibility (WCAG 2.1 AA compliant)
+   ============================================================ */
+
+/* ========================================
+   Dark Mode Color Variables
+   ======================================== */
+:root[data-theme="dark"] {
+  /* Inverted Grayscale - Deep blacks to soft whites */
+  --rams-white: #0A0A0A;
+  --rams-gray-50: #121212;
+  --rams-gray-100: #1A1A1A;
+  --rams-gray-200: #2A2A2A;
+  --rams-gray-300: #3A3A3A;
+  --rams-gray-400: #6B6B6B;
+  --rams-gray-500: #9B9B9B;
+  --rams-gray-600: #BABABA;
+  --rams-gray-700: #D4D4D4;
+  --rams-gray-800: #E5E5E5;
+  --rams-gray-900: #F5F5F5;
+  --rams-black: #FFFFFF;
+
+  /* Accent Color - Bright Forest Green (maintains brand) */
+  --rams-accent: #52B788;
+  --rams-accent-light: #74C69D;
+  --rams-accent-lighter: #95D5B2;
+  --rams-accent-dark: #2D6A4F;
+
+  /* Functional Colors - Optimized for dark backgrounds */
+  --rams-success: #22C55E;
+  --rams-warning: #FBBF24;
+  --rams-error: #F87171;
+  --rams-info: #60A5FA;
+
+  /* Borders - Subtle on dark */
+  --rams-border-color: var(--rams-gray-200);
+  --rams-border-color-dark: var(--rams-gray-300);
+
+  /* Shadows - Darker, more prominent */
+  --rams-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --rams-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --rams-shadow-md: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  --rams-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+}
+
+/* ========================================
+   Dark Mode Component Overrides
+   ======================================== */
+
+/* Alert Boxes - Dark mode optimized */
+:root[data-theme="dark"] .rams-alert-error {
+  background: #2A1515;
+  border-color: #5A2828;
+  border-left-color: #DC2626;
+  color: #FCA5A5;
+}
+
+:root[data-theme="dark"] .rams-alert-error strong {
+  color: #FEF2F2;
+}
+
+:root[data-theme="dark"] .rams-alert-error code {
+  background: rgba(220, 38, 38, 0.2);
+  color: #FCA5A5;
+}
+
+:root[data-theme="dark"] .rams-alert-warning {
+  background: #2A2315;
+  border-color: #5A4928;
+  border-left-color: #F59E0B;
+  color: #FCD34D;
+}
+
+:root[data-theme="dark"] .rams-alert-warning strong {
+  color: #FFFBEB;
+}
+
+:root[data-theme="dark"] .rams-alert-warning code {
+  background: rgba(245, 158, 11, 0.2);
+  color: #FCD34D;
+}
+
+:root[data-theme="dark"] .rams-alert-success {
+  background: #152A1F;
+  border-color: #285A3F;
+  border-left-color: #16A34A;
+  color: #86EFAC;
+}
+
+:root[data-theme="dark"] .rams-alert-success strong {
+  color: #F0FDF4;
+}
+
+:root[data-theme="dark"] .rams-alert-success code {
+  background: rgba(22, 163, 74, 0.2);
+  color: #86EFAC;
+}
+
+:root[data-theme="dark"] .rams-alert-info {
+  background: #15202A;
+  border-color: #28405A;
+  border-left-color: #3B82F6;
+  color: #93C5FD;
+}
+
+:root[data-theme="dark"] .rams-alert-info strong {
+  color: #EFF6FF;
+}
+
+:root[data-theme="dark"] .rams-alert-info code {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93C5FD;
+}
+
+/* Info Box - Dark variant */
+:root[data-theme="dark"] .rams-info-box {
+  background: rgba(82, 183, 136, 0.08);
+  border-color: rgba(82, 183, 136, 0.25);
+  border-left-color: var(--rams-accent);
+}
+
+/* Code Blocks - Enhanced for dark mode */
+:root[data-theme="dark"] .rams-code-block {
+  background: var(--rams-gray-100);
+  border-color: var(--rams-gray-200);
+}
+
+:root[data-theme="dark"] .rams-code-header {
+  background: var(--rams-gray-200);
+  border-bottom-color: var(--rams-gray-300);
+}
+
+:root[data-theme="dark"] .rams-code-inline {
+  background: var(--rams-gray-200);
+  border-color: var(--rams-gray-300);
+  color: var(--rams-accent-light);
+}
+
+/* Navigation - Active states optimized for dark */
+:root[data-theme="dark"] .rams-nav-link.active {
+  background: rgba(82, 183, 136, 0.12);
+  border-left-color: var(--rams-accent);
+}
+
+/* Focus states - Brighter for visibility */
+:root[data-theme="dark"] *:focus-visible {
+  outline: 2px solid var(--rams-accent-light);
+  outline-offset: 2px;
+}
+
+/* Hover states - Subtle but visible */
+:root[data-theme="dark"] .rams-feature-card:hover,
+:root[data-theme="dark"] .rams-page-nav-card:hover {
+  border-color: var(--rams-accent);
+  box-shadow: 0 0 0 1px var(--rams-accent), var(--rams-shadow-sm);
+}

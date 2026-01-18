@@ -1,0 +1,189 @@
+/* ============================================================
+   RAMS DESIGN SYSTEM - COOL GRAY MODE
+   Design Philosophy: Precision through coolness. Clinical clarity.
+   Inspired by Braun design and Swiss modernism
+   ============================================================ */
+
+/* ========================================
+   Cool Gray Mode Color Variables
+   ======================================== */
+:root[data-theme="cool"] {
+  /* Cool Blue-Gray Palette - Clinical precision */
+  --rams-white: #FAFBFC;
+  --rams-gray-50: #F5F7FA;
+  --rams-gray-100: #EDF1F5;
+  --rams-gray-200: #DFE4EA;
+  --rams-gray-300: #CED5DE;
+  --rams-gray-400: #9CA8B8;
+  --rams-gray-500: #6B7A8F;
+  --rams-gray-600: #4D5B6E;
+  --rams-gray-700: #3A4556;
+  --rams-gray-800: #2A3342;
+  --rams-gray-900: #1C232E;
+  --rams-black: #0F1419;
+
+  /* Accent Color - Slate Blue (technical precision) */
+  --rams-accent: #2F5A8B;
+  --rams-accent-light: #3D6FA3;
+  --rams-accent-lighter: #5A8DBD;
+  --rams-accent-dark: #234568;
+
+  /* Functional Colors - Cool variants */
+  --rams-success: #0E8A5E;
+  --rams-warning: #D67E0E;
+  --rams-error: #D63939;
+  --rams-info: #2F75C7;
+
+  /* Borders - Cool steel */
+  --rams-border-color: var(--rams-gray-200);
+  --rams-border-color-dark: var(--rams-gray-300);
+
+  /* Shadows - Cool, precise */
+  --rams-shadow-xs: 0 1px 2px 0 rgba(28, 35, 46, 0.05);
+  --rams-shadow-sm: 0 1px 3px 0 rgba(28, 35, 46, 0.08);
+  --rams-shadow-md: 0 2px 4px 0 rgba(28, 35, 46, 0.1);
+  --rams-shadow-lg: 0 4px 6px -1px rgba(28, 35, 46, 0.12);
+}
+
+/* ========================================
+   Cool Gray Mode Component Overrides
+   ======================================== */
+
+/* Alert Boxes - Cool, clinical tones */
+:root[data-theme="cool"] .rams-alert-error {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  border-left-color: #D63939;
+  color: #991B1B;
+}
+
+:root[data-theme="cool"] .rams-alert-error strong {
+  color: #7F1D1D;
+}
+
+:root[data-theme="cool"] .rams-alert-error code {
+  background: rgba(214, 57, 57, 0.1);
+  color: #991B1B;
+}
+
+:root[data-theme="cool"] .rams-alert-warning {
+  background: #FFFBF0;
+  border-color: #FDE68A;
+  border-left-color: #D67E0E;
+  color: #92400E;
+}
+
+:root[data-theme="cool"] .rams-alert-warning strong {
+  color: #78350F;
+}
+
+:root[data-theme="cool"] .rams-alert-warning code {
+  background: rgba(214, 126, 14, 0.1);
+  color: #92400E;
+}
+
+:root[data-theme="cool"] .rams-alert-success {
+  background: #F0FDF9;
+  border-color: #A7F3D0;
+  border-left-color: #0E8A5E;
+  color: #065F46;
+}
+
+:root[data-theme="cool"] .rams-alert-success strong {
+  color: #064E3B;
+}
+
+:root[data-theme="cool"] .rams-alert-success code {
+  background: rgba(14, 138, 94, 0.1);
+  color: #065F46;
+}
+
+:root[data-theme="cool"] .rams-alert-info {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  border-left-color: #2F75C7;
+  color: #1E3A8A;
+}
+
+:root[data-theme="cool"] .rams-alert-info strong {
+  color: #1E40AF;
+}
+
+:root[data-theme="cool"] .rams-alert-info code {
+  background: rgba(47, 117, 199, 0.1);
+  color: #1E3A8A;
+}
+
+/* Info Box - Cool slate accent */
+:root[data-theme="cool"] .rams-info-box {
+  background: rgba(47, 90, 139, 0.04);
+  border-color: rgba(47, 90, 139, 0.15);
+  border-left-color: var(--rams-accent);
+}
+
+/* Code Blocks - Cool gray tones */
+:root[data-theme="cool"] .rams-code-block {
+  background: var(--rams-gray-50);
+  border-color: var(--rams-gray-200);
+}
+
+:root[data-theme="cool"] .rams-code-header {
+  background: var(--rams-gray-100);
+  border-bottom-color: var(--rams-gray-200);
+}
+
+:root[data-theme="cool"] .rams-code-inline {
+  background: var(--rams-gray-100);
+  border-color: var(--rams-gray-200);
+  color: var(--rams-accent-dark);
+}
+
+/* Navigation - Slate blue active state */
+:root[data-theme="cool"] .rams-nav-link.active {
+  background: rgba(47, 90, 139, 0.06);
+  border-left-color: var(--rams-accent);
+  color: var(--rams-accent);
+}
+
+/* Hover states - Cool precision */
+:root[data-theme="cool"] .rams-feature-card:hover,
+:root[data-theme="cool"] .rams-page-nav-card:hover {
+  border-color: var(--rams-accent);
+  box-shadow: 0 0 0 1px rgba(47, 90, 139, 0.15), var(--rams-shadow-sm);
+}
+
+/* Pills - Slate accent */
+:root[data-theme="cool"] .rams-pill.active {
+  background: var(--rams-accent);
+  color: var(--rams-white);
+}
+
+/* Typography - Cool precision */
+:root[data-theme="cool"] .rams-page {
+  color: var(--rams-gray-900);
+  background: var(--rams-white);
+}
+
+/* Progress - Cool slate */
+:root[data-theme="cool"] .rams-progress-step.active .rams-step-num {
+  background: var(--rams-accent);
+  color: var(--rams-white);
+}
+
+:root[data-theme="cool"] .rams-progress-step.active .rams-step-label {
+  color: var(--rams-accent);
+}
+
+/* Buttons - Cool slate primary */
+:root[data-theme="cool"] .rams-btn-primary,
+:root[data-theme="cool"] .rams-btn-secondary {
+  background: var(--rams-accent);
+  color: var(--rams-white);
+  border-color: var(--rams-accent);
+}
+
+:root[data-theme="cool"] .rams-btn-primary:hover,
+:root[data-theme="cool"] .rams-btn-secondary:hover {
+  background: var(--rams-accent-light);
+  border-color: var(--rams-accent-light);
+}
