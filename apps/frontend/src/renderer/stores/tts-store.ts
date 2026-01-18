@@ -91,7 +91,7 @@ export const useTTSStore = create<TTSState>((set, get) => ({
       const result = await window.electronAPI.getAutoSpeakConfig();
       if (result.success && result.data) {
         // If autoSpeak is enabled or provider is configured, enable the main TTS toggle
-        // This ensures the TTS settings section is visible after refresh
+        // This ensures the TTS settings section stays visible after refresh
         const shouldEnableTTS = result.data.enabled || !!result.data.provider;
 
         set({

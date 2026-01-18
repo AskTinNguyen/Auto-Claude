@@ -384,7 +384,11 @@ _global_tts_manager: Optional[TTSManager] = None
 
 def get_tts_manager(config: Optional[TTSConfig] = None, project_dir: Optional[Union[str, Path]] = None) -> TTSManager:
     """
-    Get global TTS manager instance.
+    Get TTS manager instance.
+
+    When project_dir is provided, always creates a fresh manager to ensure
+    the latest voice-config.json settings are used. This is important because
+    users may change voice settings in the UI between calls.
 
     Args:
         config: Optional configuration (uses env vars if None)
@@ -395,8 +399,16 @@ def get_tts_manager(config: Optional[TTSConfig] = None, project_dir: Optional[Un
     """
     global _global_tts_manager
 
+    # If project_dir is provided, always create fresh manager to pick up config changes
+    if project_dir is not None:
+        proj_path = Path(project_dir) if isinstance(project_dir, str) else project_dir
+        # Always recreate to ensure we read the latest voice-config.json
+        _global_tts_manager = TTSManager(config, project_dir=proj_path)
+        return _global_tts_manager
+
+    # No project_dir - use cached global if available
     if _global_tts_manager is None:
-        _global_tts_manager = TTSManager(config, project_dir=project_dir)
+        _global_tts_manager = TTSManager(config, project_dir=None)
 
     return _global_tts_manager
 
