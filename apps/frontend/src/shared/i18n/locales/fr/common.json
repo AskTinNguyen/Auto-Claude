@@ -79,7 +79,8 @@
     "add": "Ajouter",
     "gotIt": "Compris",
     "continue": "Continuer",
-    "saving": "Enregistrement..."
+    "saving": "Enregistrement...",
+    "generateDocumentation": "Générer la Documentation"
   },
   "labels": {
     "loading": "Chargement...",
@@ -91,7 +92,22 @@
     "noData": "Aucune donnée",
     "optional": "Optionnel",
     "required": "Requis",
-    "dismiss": "Ignorer"
+    "dismiss": "Ignorer",
+    "confirmDiscard": "Êtes-vous sûr de vouloir abandonner cette documentation ?",
+    "noSelection": "Aucune documentation sélectionnée",
+    "content": "Contenu",
+    "modified": "Modifié",
+    "resetToGenerated": "Réinitialiser au contenu généré",
+    "enterContent": "Entrez le contenu de la documentation...",
+    "discard": "Abandonner",
+    "save": "Enregistrer",
+    "apply": "Appliquer",
+    "preview": "Aperçu",
+    "copied": "Copié !",
+    "copy": "Copier",
+    "noContent": "Aucun contenu à prévisualiser",
+    "noDocumentation": "Aucune Documentation",
+    "generating": "Génération..."
   },
   "selection": {
     "select": "Sélectionner",
@@ -120,6 +136,9 @@
     "failedToDeleteTaskWorktree": "Échec de la suppression du worktree de tâche : {{specName}}",
     "terminalWorktreeNotFound": "Worktree terminal introuvable : {{name}}",
     "failedToDeleteTerminalWorktree": "Échec de la suppression du worktree terminal : {{name}}"
+  },
+  "messages": {
+    "noDocumentationGenerated": "Aucune documentation n'a encore été générée. Cliquez sur le bouton ci-dessous pour commencer."
   },
   "notification": {
     "accountSwitched": "Compte changé",
