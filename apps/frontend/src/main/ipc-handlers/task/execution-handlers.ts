@@ -199,6 +199,25 @@ export function registerTaskExecutionHandlers(
 
       console.warn('[TASK_START] hasSpec:', hasSpec, 'needsSpecCreation:', needsSpecCreation, 'needsImplementation:', needsImplementation);
 
+      // FIX: Update plan file status to 'in_progress' BEFORE starting the process
+      // This ensures that when tasks reload from disk, they show the correct status
+      // (prevents stale 'human_review' status from persisting)
+      const statusPlanPath = path.join(specDir, AUTO_BUILD_PATHS.IMPLEMENTATION_PLAN);
+      if (existsSync(statusPlanPath)) {
+        try {
+          const planContent = readFileSync(statusPlanPath, 'utf-8');
+          const plan = JSON.parse(planContent);
+          plan.status = 'in_progress';
+          plan.planStatus = 'in_progress';
+          plan.updated_at = new Date().toISOString();
+          writeFileSync(statusPlanPath, JSON.stringify(plan, null, 2));
+          console.warn('[TASK_START] Updated plan file status to in_progress');
+        } catch (err) {
+          console.error('[TASK_START] Failed to update plan file:', err);
+          // Continue anyway - IPC message will still update UI
+        }
+      }
+
       // Get base branch: task-level override takes precedence over project settings
       const baseBranch = task.metadata?.baseBranch || project.settings?.mainBranch;
 

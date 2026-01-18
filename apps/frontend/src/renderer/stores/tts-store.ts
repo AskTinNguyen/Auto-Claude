@@ -90,7 +90,12 @@ export const useTTSStore = create<TTSState>((set, get) => ({
     try {
       const result = await window.electronAPI.getAutoSpeakConfig();
       if (result.success && result.data) {
+        // If autoSpeak is enabled or provider is configured, enable the main TTS toggle
+        // This ensures the TTS settings section is visible after refresh
+        const shouldEnableTTS = result.data.enabled || !!result.data.provider;
+
         set({
+          enabled: shouldEnableTTS,
           autoSpeak: result.data.enabled,
           autoSpeakMode: result.data.mode || 'short',
           provider: result.data.provider || get().provider,
@@ -163,6 +168,8 @@ export const useTTSStore = create<TTSState>((set, get) => ({
   },
 }));
 
-// Load voices and auto-speak config on store initialization
-useTTSStore.getState().loadVoices();
-useTTSStore.getState().loadAutoSpeakConfig();
+// Load config first (which sets provider), then load voices for that provider
+// This ensures voices match the saved provider from the start
+useTTSStore.getState().loadAutoSpeakConfig().then(() => {
+  useTTSStore.getState().loadVoices();
+});
