@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Optional
 
 from core.client import create_client
-from models.pattern import CodePattern, PatternCategory, PatternMetadata
+from pattern_service.models import CodePattern, PatternCategory, PatternMetadata
 from services.pattern_library import PatternLibrary, categorize_pattern
 from ui import (
     Icons,

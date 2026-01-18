@@ -45,7 +45,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from models.pattern import CodePattern, PatternCategory, PatternMetadata
+from pattern_service.models import CodePattern, PatternCategory, PatternMetadata
 
 logger = logging.getLogger(__name__)
 
