@@ -294,3 +294,189 @@ class PatternLibrary:
         """
         patterns = self._load_patterns()
         return len(patterns)
+
+
+def categorize_pattern(
+    pattern_type: str,
+    description: str = "",
+    code_example: str = "",
+    keywords: list[str] | None = None,
+    files_involved: list[str] | None = None,
+) -> PatternCategory:
+    """
+    Categorize a pattern based on its characteristics.
+
+    Args:
+        pattern_type: Type of the pattern (e.g., "react-component", "express-middleware")
+        description: Pattern description
+        code_example: Code example content
+        keywords: List of keywords associated with the pattern
+        files_involved: List of files involved in the pattern
+
+    Returns:
+        PatternCategory enum value
+
+    Example:
+        >>> categorize_pattern("react-component", description="Login form component")
+        <PatternCategory.COMPONENT: 'component'>
+        >>> categorize_pattern("express-middleware", code_example="app.use(authenticate)")
+        <PatternCategory.AUTHENTICATION: 'authentication'>
+    """
+    if keywords is None:
+        keywords = []
+    if files_involved is None:
+        files_involved = []
+
+    # Combine all text for analysis
+    all_text = f"{pattern_type} {description} {code_example} {' '.join(keywords)}".lower()
+
+    # Check file extensions
+    file_extensions = {Path(f).suffix for f in files_involved}
+
+    # Component patterns
+    component_keywords = ["component", "react", "vue", "angular", "widget", "ui", "jsx", "tsx"]
+    if any(kw in all_text for kw in component_keywords):
+        return PatternCategory.COMPONENT
+
+    # Authentication patterns
+    auth_keywords = [
+        "auth",
+        "login",
+        "logout",
+        "password",
+        "token",
+        "jwt",
+        "session",
+        "oauth",
+        "credential",
+    ]
+    if any(kw in all_text for kw in auth_keywords):
+        return PatternCategory.AUTHENTICATION
+
+    # Database patterns
+    db_keywords = [
+        "database",
+        "db",
+        "sql",
+        "query",
+        "model",
+        "schema",
+        "migration",
+        "sequelize",
+        "mongoose",
+        "typeorm",
+        "prisma",
+    ]
+    if any(kw in all_text for kw in db_keywords):
+        return PatternCategory.DATABASE
+
+    # API patterns
+    api_keywords = [
+        "api",
+        "endpoint",
+        "route",
+        "controller",
+        "express",
+        "fastapi",
+        "flask",
+        "http",
+        "rest",
+        "graphql",
+    ]
+    if any(kw in all_text for kw in api_keywords):
+        return PatternCategory.API
+
+    # State management patterns
+    state_keywords = [
+        "state",
+        "redux",
+        "zustand",
+        "mobx",
+        "context",
+        "store",
+        "reducer",
+        "action",
+    ]
+    if any(kw in all_text for kw in state_keywords):
+        return PatternCategory.STATE_MANAGEMENT
+
+    # Error handling patterns
+    error_keywords = [
+        "error",
+        "exception",
+        "try",
+        "catch",
+        "finally",
+        "throw",
+        "raise",
+        "handling",
+    ]
+    if any(kw in all_text for kw in error_keywords):
+        return PatternCategory.ERROR_HANDLING
+
+    # Testing patterns
+    test_keywords = [
+        "test",
+        "jest",
+        "mocha",
+        "pytest",
+        "unittest",
+        "spec",
+        "mock",
+        "assert",
+    ]
+    if any(kw in all_text for kw in test_keywords) or any(
+        ext in {".test.js", ".test.ts", ".spec.js", ".spec.ts", "_test.py"}
+        for ext in file_extensions
+    ):
+        return PatternCategory.TESTING
+
+    # Security patterns
+    security_keywords = [
+        "security",
+        "encrypt",
+        "decrypt",
+        "hash",
+        "sanitize",
+        "xss",
+        "csrf",
+        "injection",
+        "validation",
+    ]
+    if any(kw in all_text for kw in security_keywords):
+        return PatternCategory.SECURITY
+
+    # Performance patterns
+    perf_keywords = [
+        "performance",
+        "optimize",
+        "cache",
+        "memo",
+        "lazy",
+        "throttle",
+        "debounce",
+        "async",
+    ]
+    if any(kw in all_text for kw in perf_keywords):
+        return PatternCategory.PERFORMANCE
+
+    # Integration patterns
+    integration_keywords = [
+        "integration",
+        "webhook",
+        "external",
+        "third-party",
+        "service",
+        "client",
+        "sdk",
+    ]
+    if any(kw in all_text for kw in integration_keywords):
+        return PatternCategory.INTEGRATION
+
+    # Utility patterns
+    utility_keywords = ["util", "helper", "common", "shared", "tool"]
+    if any(kw in all_text for kw in utility_keywords):
+        return PatternCategory.UTILITY
+
+    # Default to OTHER if no match
+    return PatternCategory.OTHER
