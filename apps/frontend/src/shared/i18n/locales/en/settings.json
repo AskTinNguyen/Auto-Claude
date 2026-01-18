@@ -56,6 +56,10 @@
     "debug": {
       "title": "Debug & Logs",
       "description": "Troubleshooting tools"
+    },
+    "ralph": {
+      "title": "Ralph CLI",
+      "description": "Workflow automation settings"
     }
   },
   "apiProfiles": {
@@ -614,5 +618,34 @@
     "qrCodeTitle": "Connect via QR Code",
     "securityWarning": "Security Notice",
     "securityWarningDescription": "Only enable LAN access on trusted networks. PIN authentication is required for all remote connections."
+  },
+  "ralph": {
+    "title": "Ralph CLI",
+    "description": "Manage Ralph workflow automation settings.",
+    "noProject": "Select a project to configure Ralph settings.",
+    "noProjectSelected": "No project selected",
+    "doctor": {
+      "title": "Environment Diagnostics",
+      "description": "Check your Auto-Claude environment setup.",
+      "runButton": "Run Diagnostics"
+    },
+    "budget": {
+      "title": "Budget Management",
+      "description": "Set spending limits to prevent runaway costs.",
+      "spent": "Spent",
+      "limit": "Limit",
+      "remaining": "Remaining",
+      "placeholder": "Enter budget (USD)",
+      "setButton": "Set",
+      "clearButton": "Clear"
+    },
+    "stats": {
+      "title": "Statistics",
+      "description": "Overview of your build performance.",
+      "specs": "Specs",
+      "sessions": "Sessions",
+      "totalCost": "Total Cost",
+      "successRate": "Success Rate"
+    }
   }
 }

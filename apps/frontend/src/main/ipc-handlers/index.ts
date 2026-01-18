@@ -34,6 +34,9 @@ import { registerMcpHandlers } from './mcp-handlers';
 import { registerProfileHandlers } from './profile-handlers';
 import { registerTerminalWorktreeIpcHandlers } from './terminal';
 import { setupLanHandlers } from './lan-handlers';
+import { registerScratchpadHandlers } from './scratchpad-handlers';
+import { registerRalphHandlers } from './ralph-handlers';
+import { registerTTSHandlers } from './tts-handlers';
 import { notificationService } from '../notification-service';
 
 /**
@@ -122,6 +125,15 @@ export function setupIpcHandlers(
   // LAN access handlers
   setupLanHandlers();
 
+  // ScratchPad handlers (Notes, Snippets, Templates)
+  registerScratchpadHandlers();
+
+  // Ralph CLI handlers (doctor, stats, budget, streams, TTS, review)
+  registerRalphHandlers();
+
+  // TTS (Text-to-Speech) handlers
+  registerTTSHandlers(getMainWindow);
+
   console.warn('[IPC] All handler modules registered successfully');
 }
 
@@ -149,5 +161,8 @@ export {
   registerClaudeCodeHandlers,
   registerMcpHandlers,
   registerProfileHandlers,
-  setupLanHandlers
+  setupLanHandlers,
+  registerScratchpadHandlers,
+  registerRalphHandlers,
+  registerTTSHandlers
 };
