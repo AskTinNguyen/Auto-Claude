@@ -33,7 +33,7 @@ def test_pattern_workflow():
     test_results["total_tests"] += 1
     try:
         from services.pattern_library import PatternLibrary, categorize_pattern
-        from models.pattern import CodePattern, PatternCategory, PatternMetadata
+        from pattern_service.models import CodePattern, PatternCategory, PatternMetadata
 
         # Create temp directory for test library
         with tempfile.TemporaryDirectory() as tmpdir:
