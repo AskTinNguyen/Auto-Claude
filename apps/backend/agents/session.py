@@ -7,15 +7,19 @@ memory updates, recovery tracking, and Linear integration.
 """
 
 import logging
+import os
 from pathlib import Path
 
 from claude_agent_sdk import ClaudeSDKClient
 from debug import debug, debug_detailed, debug_error, debug_section, debug_success
 from insight_extractor import extract_session_insights
+from integrations.tts import get_tts_manager
 from linear_updater import (
     linear_subtask_completed,
     linear_subtask_failed,
 )
+from monitoring import CostTracker, EventLogger, HeartbeatMonitor
+from monitoring.cost_tracker import TokenUsage
 from progress import (
     count_subtasks_detailed,
     is_build_complete,
@@ -81,6 +85,9 @@ async def post_session_processing(
     print()
     print(muted("--- Post-Session Processing ---"))
 
+    # Get TTS manager for announcements
+    tts_manager = get_tts_manager()
+
     # Sync implementation plan back to source (for worktree mode)
     if sync_spec_to_source(spec_dir, source_spec_dir):
         print_status("Implementation plan synced to main project", "success")
@@ -109,6 +116,9 @@ async def post_session_processing(
     if subtask_status == "completed":
         # Success! Record the attempt and good commit
         print_status(f"Subtask {subtask_id} completed successfully", "success")
+
+        # Announce subtask completion via TTS
+        tts_manager.speak_subtask_complete(subtask.get("description", subtask_id), success=True)
 
         # Update status file
         if status_manager:
@@ -317,6 +327,9 @@ async def run_agent_session(
     spec_dir: Path,
     verbose: bool = False,
     phase: LogPhase = LogPhase.CODING,
+    session_id: int | None = None,
+    subtask_id: str | None = None,
+    model: str = "claude-sonnet-4-5-20250929",
 ) -> tuple[str, str]:
     """
     Run a single agent session using Claude Agent SDK.
@@ -327,6 +340,9 @@ async def run_agent_session(
         spec_dir: Spec directory path
         verbose: Whether to show detailed output
         phase: Current execution phase for logging
+        session_id: Optional session ID for monitoring
+        subtask_id: Optional subtask ID for monitoring
+        model: Model being used (for cost tracking)
 
     Returns:
         (status, response_text) where status is:
@@ -350,6 +366,33 @@ async def run_agent_session(
     current_tool = None
     message_count = 0
     tool_count = 0
+
+    # Initialize monitoring systems (if enabled via env vars)
+    monitoring_enabled = os.getenv("MONITORING_ENABLED", "false").lower() == "true"
+    event_logger = EventLogger(spec_dir) if monitoring_enabled else None
+    cost_tracker = None
+    heartbeat_monitor = None
+
+    if monitoring_enabled:
+        # Initialize cost tracker with budget from env
+        budget_str = os.getenv("COST_BUDGET_USD")
+        budget = float(budget_str) if budget_str else None
+        cost_tracker = CostTracker(spec_dir, budget_usd=budget)
+
+        # Initialize heartbeat monitor
+        heartbeat_interval = int(os.getenv("HEARTBEAT_INTERVAL", "60"))
+        if session_id is not None:
+            heartbeat_monitor = HeartbeatMonitor(spec_dir, session_id=session_id)
+            heartbeat_monitor.update(
+                subtask_id=subtask_id,
+                phase=phase.value,
+                activity="Starting session",
+            )
+            heartbeat_monitor.start()
+
+        # Log session start event
+        if event_logger:
+            event_logger.session_start(session_id or 0, phase=phase.value, metadata={"model": model})
 
     try:
         # Send the query
@@ -520,6 +563,68 @@ async def run_agent_session(
 
         print("\n" + "-" * 70 + "\n")
 
+        # Extract token usage from response metadata (if available)
+        if monitoring_enabled and cost_tracker and hasattr(client, "_last_usage"):
+            # Try to get usage from SDK client (this is SDK-specific)
+            try:
+                usage = client._last_usage
+                if usage:
+                    token_usage = TokenUsage(
+                        input_tokens=getattr(usage, "input_tokens", 0),
+                        output_tokens=getattr(usage, "output_tokens", 0),
+                        cache_creation_input_tokens=getattr(usage, "cache_creation_input_tokens", 0),
+                        cache_read_input_tokens=getattr(usage, "cache_read_input_tokens", 0),
+                    )
+
+                    # Record costs
+                    cost_result = cost_tracker.record_session(
+                        session_id=session_id or 0,
+                        model=model,
+                        usage=token_usage,
+                        subtask_id=subtask_id,
+                        phase=phase.value,
+                    )
+
+                    # Log cost summary
+                    print_key_value("Session cost", f"${cost_result['session_cost_usd']:.4f}")
+                    print_key_value("Total cost", f"${cost_result['total_cost_usd']:.4f}")
+
+                    # Check budget warnings
+                    if cost_result.get("budget_exceeded"):
+                        print_status("BUDGET EXCEEDED - Consider stopping build", "error")
+                        if event_logger:
+                            event_logger.cost_exceeded(
+                                f"Total cost ${cost_result['total_cost_usd']:.4f} exceeded budget",
+                                metadata=cost_result,
+                            )
+                    elif cost_result.get("budget_warning"):
+                        print_status(
+                            f"Budget warning: {cost_result.get('budget_usage_percent', 0):.1f}% used",
+                            "warning",
+                        )
+                        if event_logger:
+                            event_logger.cost_warning(
+                                f"Budget usage at {cost_result.get('budget_usage_percent', 0):.1f}%",
+                                metadata=cost_result,
+                            )
+            except Exception as cost_error:
+                debug_error("session", f"Failed to track costs: {cost_error}")
+
+        # Stop heartbeat monitor
+        if heartbeat_monitor:
+            heartbeat_monitor.stop()
+
+        # Log session end event
+        if event_logger:
+            event_logger.session_end(
+                session_id or 0,
+                metadata={
+                    "message_count": message_count,
+                    "tool_count": tool_count,
+                    "response_length": len(response_text),
+                },
+            )
+
         # Check if build is complete
         if is_build_complete(spec_dir):
             debug_success(
@@ -551,4 +656,16 @@ async def run_agent_session(
         print(f"Error during agent session: {e}")
         if task_logger:
             task_logger.log_error(f"Session error: {e}", phase)
+
+        # Log error event
+        if event_logger:
+            event_logger.error(
+                f"Session error: {e}",
+                metadata={"exception_type": type(e).__name__},
+            )
+
+        # Stop heartbeat monitor
+        if heartbeat_monitor:
+            heartbeat_monitor.stop()
+
         return "error", str(e)
