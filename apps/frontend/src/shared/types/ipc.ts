@@ -809,6 +809,13 @@ export interface ElectronAPI {
   // MCP Server health check operations
   checkMcpHealth: (server: CustomMcpServer) => Promise<IPCResult<McpHealthCheckResult>>;
   testMcpConnection: (server: CustomMcpServer) => Promise<IPCResult<McpTestConnectionResult>>;
+
+  // TTS (Text-to-Speech) operations
+  getStatus: () => Promise<IPCResult<import('./tts').TTSStatus>>;
+  getVoices: (provider?: import('./tts').TTSProvider) => Promise<IPCResult<import('./tts').TTSVoice[]>>;
+  testVoice: (provider: import('./tts').TTSProvider, voiceId: string, text?: string) => Promise<IPCResult<void>>;
+  getAutoSpeakConfig: () => Promise<IPCResult<{ enabled: boolean; mode: 'short' | 'full'; provider?: import('./tts').TTSProvider; selectedVoice?: string | null }>>;
+  setAutoSpeak: (enabled: boolean, mode: 'short' | 'full', provider?: import('./tts').TTSProvider, selectedVoice?: string | null) => Promise<IPCResult<void>>;
 }
 
 declare global {

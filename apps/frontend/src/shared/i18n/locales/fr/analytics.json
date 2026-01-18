@@ -32,7 +32,13 @@
       "system": "Système par défaut"
     },
     "selectVoice": "Sélectionner une voix",
-    "noVoicesAvailable": "Aucune voix disponible"
+    "noVoicesAvailable": "Aucune voix disponible",
+    "autoSpeak": "Auto-Parole (Ralph)",
+    "autoSpeakDescription": "Annoncer automatiquement les transitions de phase, les sous-tâches et les résultats QA",
+    "autoSpeakMode": "Mode d'annonce",
+    "autoSpeakModeDescription": "Choisir le niveau de verbosité des annonces",
+    "autoSpeakModeShort": "Court (Annonces concises)",
+    "autoSpeakModeFull": "Complet (Annonces détaillées)"
   },
   "monitoring": {
     "title": "Surveillance",

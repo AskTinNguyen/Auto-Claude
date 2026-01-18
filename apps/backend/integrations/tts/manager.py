@@ -6,7 +6,8 @@ with automatic filtering and provider fallback.
 """
 
 import logging
-from typing import Optional, List, Dict
+from pathlib import Path
+from typing import Optional, List, Dict, Union
 
 from .config import TTSConfig
 from .filters import OutputFilter
@@ -28,14 +29,20 @@ class TTSManager:
     - Specialized methods for different announcement types
     """
 
-    def __init__(self, config: Optional[TTSConfig] = None):
+    def __init__(self, config: Optional[TTSConfig] = None, project_dir: Optional[Union[str, Path]] = None):
         """
         Initialize TTS manager.
 
         Args:
             config: TTS configuration (uses env vars if None)
+            project_dir: Optional project directory to read voice-config.json from
         """
-        self.config = config or TTSConfig.from_env()
+        if config:
+            self.config = config
+        else:
+            # Convert project_dir to Path if provided
+            proj_path = Path(project_dir) if project_dir else None
+            self.config = TTSConfig.from_env(project_dir=proj_path)
         self.filter = OutputFilter(
             filter_code=self.config.filter_code_blocks,
             filter_markdown=self.config.filter_markdown,
@@ -375,12 +382,13 @@ class TTSManager:
 _global_tts_manager: Optional[TTSManager] = None
 
 
-def get_tts_manager(config: Optional[TTSConfig] = None) -> TTSManager:
+def get_tts_manager(config: Optional[TTSConfig] = None, project_dir: Optional[Union[str, Path]] = None) -> TTSManager:
     """
     Get global TTS manager instance.
 
     Args:
         config: Optional configuration (uses env vars if None)
+        project_dir: Optional project directory to read voice-config.json from
 
     Returns:
         TTSManager instance
@@ -388,7 +396,7 @@ def get_tts_manager(config: Optional[TTSConfig] = None) -> TTSManager:
     global _global_tts_manager
 
     if _global_tts_manager is None:
-        _global_tts_manager = TTSManager(config)
+        _global_tts_manager = TTSManager(config, project_dir=project_dir)
 
     return _global_tts_manager
 

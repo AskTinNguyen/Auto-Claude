@@ -32,7 +32,13 @@
       "system": "System Default"
     },
     "selectVoice": "Select a voice",
-    "noVoicesAvailable": "No voices available"
+    "noVoicesAvailable": "No voices available",
+    "autoSpeak": "Auto-Speak (Ralph)",
+    "autoSpeakDescription": "Automatically announce phase transitions, subtasks, and QA results",
+    "autoSpeakMode": "Announcement Mode",
+    "autoSpeakModeDescription": "Choose announcement verbosity level",
+    "autoSpeakModeShort": "Short (Concise announcements)",
+    "autoSpeakModeFull": "Full (Detailed announcements)"
   },
   "monitoring": {
     "title": "Monitoring",

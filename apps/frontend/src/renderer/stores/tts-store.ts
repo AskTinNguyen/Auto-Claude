@@ -10,6 +10,8 @@ interface TTSState {
   availableVoices: TTSVoice[];
   isLoading: boolean;
   isTesting: boolean;
+  autoSpeak: boolean;
+  autoSpeakMode: 'short' | 'full';
 
   // Actions
   setEnabled: (enabled: boolean) => void;
@@ -18,6 +20,10 @@ interface TTSState {
   setAvailableVoices: (voices: TTSVoice[]) => void;
   setLoading: (loading: boolean) => void;
   setTesting: (testing: boolean) => void;
+  setAutoSpeak: (enabled: boolean) => Promise<void>;
+  setAutoSpeakMode: (mode: 'short' | 'full') => Promise<void>;
+  loadAutoSpeakConfig: () => Promise<void>;
+  saveVoiceConfig: () => Promise<void>;
   testVoice: () => Promise<void>;
   loadVoices: () => Promise<void>;
 }
@@ -29,22 +35,89 @@ export const useTTSStore = create<TTSState>((set, get) => ({
   availableVoices: [],
   isLoading: false,
   isTesting: false,
+  autoSpeak: false,
+  autoSpeakMode: 'short',
 
   setEnabled: (enabled) => set({ enabled }),
 
-  setProvider: (provider) => {
+  setProvider: async (provider) => {
     set({ provider, selectedVoice: null });
     // Reload voices for the new provider
     get().loadVoices();
+    // Save provider to config
+    await get().saveVoiceConfig();
   },
 
-  setSelectedVoice: (voiceId) => set({ selectedVoice: voiceId }),
+  setSelectedVoice: async (voiceId) => {
+    set({ selectedVoice: voiceId });
+    // Save selected voice to config
+    await get().saveVoiceConfig();
+  },
 
   setAvailableVoices: (voices) => set({ availableVoices: voices }),
 
   setLoading: (loading) => set({ isLoading: loading }),
 
   setTesting: (testing) => set({ isTesting: testing }),
+
+  setAutoSpeak: async (enabled) => {
+    try {
+      const result = await window.electronAPI.setAutoSpeak(enabled, get().autoSpeakMode);
+      if (result.success) {
+        set({ autoSpeak: enabled });
+      } else {
+        console.error('Failed to set auto-speak:', result.error);
+      }
+    } catch (error) {
+      console.error('Failed to set auto-speak:', error);
+    }
+  },
+
+  setAutoSpeakMode: async (mode) => {
+    try {
+      const result = await window.electronAPI.setAutoSpeak(get().autoSpeak, mode);
+      if (result.success) {
+        set({ autoSpeakMode: mode });
+      } else {
+        console.error('Failed to set auto-speak mode:', result.error);
+      }
+    } catch (error) {
+      console.error('Failed to set auto-speak mode:', error);
+    }
+  },
+
+  loadAutoSpeakConfig: async () => {
+    try {
+      const result = await window.electronAPI.getAutoSpeakConfig();
+      if (result.success && result.data) {
+        set({
+          autoSpeak: result.data.enabled,
+          autoSpeakMode: result.data.mode || 'short',
+          provider: result.data.provider || get().provider,
+          selectedVoice: result.data.selectedVoice || get().selectedVoice,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load auto-speak config:', error);
+    }
+  },
+
+  saveVoiceConfig: async () => {
+    try {
+      const { autoSpeak, autoSpeakMode, provider, selectedVoice } = get();
+      const result = await window.electronAPI.setAutoSpeak(
+        autoSpeak,
+        autoSpeakMode,
+        provider,
+        selectedVoice
+      );
+      if (!result.success) {
+        console.error('Failed to save voice config:', result.error);
+      }
+    } catch (error) {
+      console.error('Failed to save voice config:', error);
+    }
+  },
 
   testVoice: async () => {
     const { selectedVoice, provider } = get();
@@ -90,5 +163,6 @@ export const useTTSStore = create<TTSState>((set, get) => ({
   },
 }));
 
-// Load voices on store initialization
+// Load voices and auto-speak config on store initialization
 useTTSStore.getState().loadVoices();
+useTTSStore.getState().loadAutoSpeakConfig();

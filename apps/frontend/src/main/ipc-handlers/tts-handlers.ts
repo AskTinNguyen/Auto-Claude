@@ -6,6 +6,8 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { app } from 'electron';
 import { debugError, debugLog } from '../../shared/utils/debug-logger';
+import fs from 'fs/promises';
+import { existsSync } from 'fs';
 
 /**
  * Get the path to the Python backend
@@ -88,6 +90,96 @@ function toCamelCase(obj: any): any {
     }, {} as any);
   }
   return obj;
+}
+
+/**
+ * Get the path to the voice-config.json file
+ */
+function getVoiceConfigPath(): string {
+  const isDev = !app.isPackaged;
+  let projectRoot: string;
+
+  if (isDev) {
+    // Development: go up from apps/frontend to project root
+    projectRoot = path.join(app.getAppPath(), '..', '..');
+  } else {
+    // Production: assume config is in resources
+    projectRoot = process.resourcesPath;
+  }
+
+  return path.join(projectRoot, '.ralph', 'voice-config.json');
+}
+
+/**
+ * Read auto-speak configuration from voice-config.json
+ */
+async function readAutoSpeakConfig(): Promise<{ enabled: boolean; mode: 'short' | 'full'; provider?: string; selectedVoice?: string | null }> {
+  const configPath = getVoiceConfigPath();
+
+  // Default config
+  const defaultConfig = { enabled: false, mode: 'short' as const, provider: undefined, selectedVoice: undefined };
+
+  try {
+    if (!existsSync(configPath)) {
+      return defaultConfig;
+    }
+
+    const content = await fs.readFile(configPath, 'utf-8');
+    const config = JSON.parse(content);
+
+    return {
+      enabled: config.autoSpeak?.enabled ?? defaultConfig.enabled,
+      mode: config.autoSpeak?.mode ?? defaultConfig.mode,
+      provider: config.voice?.provider,
+      selectedVoice: config.voice?.selectedVoice
+    };
+  } catch (error) {
+    debugError('[TTS-IPC] Failed to read voice-config.json:', error);
+    return defaultConfig;
+  }
+}
+
+/**
+ * Write auto-speak configuration to voice-config.json
+ */
+async function writeAutoSpeakConfig(enabled: boolean, mode: 'short' | 'full', provider?: string, selectedVoice?: string | null): Promise<void> {
+  const configPath = getVoiceConfigPath();
+  const configDir = path.dirname(configPath);
+
+  try {
+    // Ensure .ralph directory exists
+    if (!existsSync(configDir)) {
+      await fs.mkdir(configDir, { recursive: true });
+    }
+
+    // Read existing config or create new one
+    let config: any = {};
+    if (existsSync(configPath)) {
+      const content = await fs.readFile(configPath, 'utf-8');
+      config = JSON.parse(content);
+    }
+
+    // Update autoSpeak section
+    config.autoSpeak = { enabled, mode };
+
+    // Update voice section if provider/selectedVoice provided
+    if (provider !== undefined || selectedVoice !== undefined) {
+      config.voice = config.voice || {};
+      if (provider !== undefined) {
+        config.voice.provider = provider;
+      }
+      if (selectedVoice !== undefined) {
+        config.voice.selectedVoice = selectedVoice;
+      }
+    }
+
+    // Write back to file
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    debugLog('[TTS-IPC] Updated voice-config.json:', config);
+  } catch (error) {
+    debugError('[TTS-IPC] Failed to write voice-config.json:', error);
+    throw error;
+  }
 }
 
 /**
@@ -212,6 +304,57 @@ export function registerTTSHandlers(
         };
       } catch (error) {
         debugError('[TTS-IPC] Error testing voice:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // Get Auto-Speak Config
+  // ============================================
+
+  ipcMain.handle(
+    IPC_CHANNELS.TTS_GET_AUTOSPEAK,
+    async (): Promise<IPCResult<{ enabled: boolean; mode: 'short' | 'full'; provider?: string; selectedVoice?: string | null }>> => {
+      try {
+        debugLog('[TTS-IPC] Getting auto-speak config');
+
+        const config = await readAutoSpeakConfig();
+
+        return {
+          success: true,
+          data: config
+        };
+      } catch (error) {
+        debugError('[TTS-IPC] Error getting auto-speak config:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    }
+  );
+
+  // ============================================
+  // Set Auto-Speak Config
+  // ============================================
+
+  ipcMain.handle(
+    IPC_CHANNELS.TTS_SET_AUTOSPEAK,
+    async (_, enabled: boolean, mode: 'short' | 'full', provider?: string, selectedVoice?: string | null): Promise<IPCResult<void>> => {
+      try {
+        debugLog('[TTS-IPC] Setting auto-speak config:', { enabled, mode, provider, selectedVoice });
+
+        await writeAutoSpeakConfig(enabled, mode, provider, selectedVoice);
+
+        return {
+          success: true
+        };
+      } catch (error) {
+        debugError('[TTS-IPC] Error setting auto-speak config:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error'

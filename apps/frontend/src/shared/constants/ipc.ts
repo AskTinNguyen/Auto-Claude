@@ -530,6 +530,8 @@ export const IPC_CHANNELS = {
   TTS_GET_STATUS: 'tts:getStatus',               // Get TTS manager status
   TTS_GET_VOICES: 'tts:getVoices',               // List available voices by provider
   TTS_TEST_VOICE: 'tts:testVoice',               // Test a voice by speaking text
+  TTS_GET_AUTOSPEAK: 'tts:getAutoSpeak',         // Get Ralph auto-speak configuration
+  TTS_SET_AUTOSPEAK: 'tts:setAutoSpeak',         // Set Ralph auto-speak configuration
 
   // Monitoring operations (cost tracking and heartbeat)
   MONITORING_GET_COST_METRICS: 'monitoring:getCostMetrics',       // Get cost and token usage metrics

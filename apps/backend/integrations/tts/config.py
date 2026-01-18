@@ -3,6 +3,8 @@ TTS configuration management.
 """
 
 import os
+import json
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
@@ -38,9 +40,10 @@ class TTSConfig:
     filter_urls: bool = True
 
     @classmethod
-    def from_env(cls) -> "TTSConfig":
-        """Create configuration from environment variables."""
-        return cls(
+    def from_env(cls, project_dir: Optional[Path] = None) -> "TTSConfig":
+        """Create configuration from environment variables and voice-config.json."""
+        # Read from environment variables
+        config = cls(
             enabled=os.getenv("TTS_ENABLED", "false").lower() == "true",
             preferred_provider=os.getenv("TTS_PROVIDER"),
             piper_model=os.getenv("TTS_PIPER_MODEL", "en_US-lessac-medium"),
@@ -56,6 +59,36 @@ class TTSConfig:
             filter_file_paths=os.getenv("TTS_FILTER_PATHS", "true").lower() == "true",
             filter_urls=os.getenv("TTS_FILTER_URLS", "true").lower() == "true",
         )
+
+        # Override with voice-config.json if available (for auto-speak integration)
+        if project_dir:
+            voice_config_path = project_dir / ".ralph" / "voice-config.json"
+            if voice_config_path.exists():
+                try:
+                    with open(voice_config_path, 'r') as f:
+                        voice_config = json.load(f)
+
+                    # Override provider if specified in voice config
+                    if voice_config.get("voice", {}).get("provider"):
+                        config.preferred_provider = voice_config["voice"]["provider"]
+
+                    # Override voice selection if specified
+                    if voice_config.get("voice", {}).get("selectedVoice"):
+                        selected_voice = voice_config["voice"]["selectedVoice"]
+
+                        # Update provider-specific voice settings
+                        if config.preferred_provider == "piper":
+                            # Piper voice format is like "en_US-ryan-medium"
+                            config.piper_model = selected_voice
+                        elif config.preferred_provider == "macos":
+                            # macOS voice is just the name like "Ryan"
+                            config.macos_voice = selected_voice
+
+                except (json.JSONDecodeError, OSError) as e:
+                    # Silently ignore errors - fall back to env var config
+                    pass
+
+        return config
 
     def is_enabled(self) -> bool:
         """Check if TTS is enabled."""

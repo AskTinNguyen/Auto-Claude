@@ -27,9 +27,13 @@ export function TTSControls({ className }: TTSControlsProps) {
     availableVoices,
     isLoading,
     isTesting,
+    autoSpeak,
+    autoSpeakMode,
     setEnabled,
     setProvider,
     setSelectedVoice,
+    setAutoSpeak,
+    setAutoSpeakMode,
     testVoice,
   } = useTTSStore();
 
@@ -133,6 +137,41 @@ export function TTSControls({ className }: TTSControlsProps) {
                 {isTesting ? t('tts.testing') : t('tts.testVoice')}
               </Button>
             </div>
+
+            {/* Divider */}
+            <div className="border-t pt-4 mt-2" />
+
+            {/* Auto-Speak Toggle (Ralph Integration) */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-speak-enabled">{t('tts.autoSpeak')}</Label>
+                <p className="text-sm text-muted-foreground">{t('tts.autoSpeakDescription')}</p>
+              </div>
+              <Switch
+                id="auto-speak-enabled"
+                checked={autoSpeak}
+                onCheckedChange={setAutoSpeak}
+              />
+            </div>
+
+            {/* Auto-Speak Mode Selection */}
+            {autoSpeak && (
+              <div className="space-y-2">
+                <Label htmlFor="auto-speak-mode">{t('tts.autoSpeakMode')}</Label>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {t('tts.autoSpeakModeDescription')}
+                </p>
+                <Select value={autoSpeakMode} onValueChange={(value: 'short' | 'full') => setAutoSpeakMode(value)}>
+                  <SelectTrigger id="auto-speak-mode">
+                    <SelectValue placeholder={t('tts.autoSpeakMode')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">{t('tts.autoSpeakModeShort')}</SelectItem>
+                    <SelectItem value="full">{t('tts.autoSpeakModeFull')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </>
         )}
       </div>
