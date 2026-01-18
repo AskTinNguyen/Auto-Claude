@@ -340,7 +340,7 @@ This is attempt {previous_error.get("consecutive_errors", 1) + 1}. If you fail t
             debug_success("qa_reviewer", "QA APPROVED")
 
             # Announce QA approval via TTS
-            tts_manager = get_tts_manager()
+            tts_manager = get_tts_manager(project_dir=project_dir)
             tts_manager.speak_qa_result(passed=True)
 
             qa_discoveries["patterns_found"].append(
@@ -361,7 +361,7 @@ This is attempt {previous_error.get("consecutive_errors", 1) + 1}. If you fail t
             debug_error("qa_reviewer", "QA REJECTED")
 
             # Announce QA rejection via TTS
-            tts_manager = get_tts_manager()
+            tts_manager = get_tts_manager(project_dir=project_dir)
             issues = status.get("issues_found", [])
             tts_manager.speak_qa_result(passed=False, issue_count=len(issues))
 

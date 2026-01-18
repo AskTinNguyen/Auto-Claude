@@ -86,7 +86,7 @@ async def post_session_processing(
     print(muted("--- Post-Session Processing ---"))
 
     # Get TTS manager for announcements
-    tts_manager = get_tts_manager()
+    tts_manager = get_tts_manager(project_dir=project_dir)
 
     # Sync implementation plan back to source (for worktree mode)
     if sync_spec_to_source(spec_dir, source_spec_dir):

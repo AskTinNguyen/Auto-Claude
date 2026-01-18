@@ -106,7 +106,7 @@ async def run_qa_validation_loop(
     print("=" * 70)
 
     # Get TTS manager for announcements
-    tts_manager = get_tts_manager()
+    tts_manager = get_tts_manager(project_dir=project_dir)
     tts_manager.speak_phase("Quality Assurance", "Starting validation")
 
     # Initialize task logger for the validation phase

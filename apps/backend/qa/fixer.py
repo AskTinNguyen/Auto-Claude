@@ -88,7 +88,7 @@ async def run_qa_fixer_session(
     print(f"{'=' * 70}\n")
 
     # Announce QA fixer starting via TTS
-    tts_manager = get_tts_manager()
+    tts_manager = get_tts_manager(project_dir=project_dir)
     tts_manager.speak("Starting quality assurance fixes", filter_content=False)
 
     # Get task logger for streaming markers

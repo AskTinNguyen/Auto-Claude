@@ -14,11 +14,38 @@ Usage:
 import sys
 import json
 import argparse
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Dict, List, Any, Optional
 
 # Import TTS components
 from .manager import get_tts_manager
 from .voice_info import VoiceInfo
+
+
+def get_project_dir() -> Optional[Path]:
+    """
+    Get the project root directory.
+
+    Searches upward from the backend directory to find the project root
+    (identified by presence of .ralph directory or being 2 levels up from backend).
+    """
+    # Start from backend directory (where this script is run from)
+    current = Path.cwd()
+
+    # If we're in apps/backend, go up two levels to project root
+    if current.name == "backend" and current.parent.name == "apps":
+        return current.parent.parent
+
+    # Search upward for .ralph directory
+    for _ in range(5):  # Limit search depth
+        if (current / ".ralph").exists():
+            return current
+        if current.parent == current:  # Reached filesystem root
+            break
+        current = current.parent
+
+    # Fallback: assume we're in backend, go up 2 levels
+    return Path.cwd().parent.parent
 
 
 def serialize_voice(voice: VoiceInfo) -> Dict[str, Any]:
@@ -29,7 +56,8 @@ def serialize_voice(voice: VoiceInfo) -> Dict[str, Any]:
 def list_voices_command(args) -> Dict[str, Any]:
     """List available voices."""
     try:
-        manager = get_tts_manager()
+        project_dir = get_project_dir()
+        manager = get_tts_manager(project_dir=project_dir)
         voices_by_provider = manager.list_all_voices(provider_filter=args.provider)
 
         # Convert to serializable format
@@ -51,7 +79,8 @@ def list_voices_command(args) -> Dict[str, Any]:
 def test_voice_command(args) -> Dict[str, Any]:
     """Test a voice by speaking text."""
     try:
-        manager = get_tts_manager()
+        project_dir = get_project_dir()
+        manager = get_tts_manager(project_dir=project_dir)
 
         # Get voice info
         voice = manager.get_voice_info(args.voice, provider=args.provider)
@@ -114,7 +143,8 @@ def test_voice_command(args) -> Dict[str, Any]:
 def get_status_command(args) -> Dict[str, Any]:
     """Get TTS manager status."""
     try:
-        manager = get_tts_manager()
+        project_dir = get_project_dir()
+        manager = get_tts_manager(project_dir=project_dir)
         status = manager.get_status()
 
         return {

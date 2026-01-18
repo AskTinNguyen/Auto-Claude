@@ -108,7 +108,7 @@ async def run_autonomous_agent(
     task_logger = get_task_logger(spec_dir)
 
     # Initialize TTS manager for voice feedback
-    tts_manager = get_tts_manager()
+    tts_manager = get_tts_manager(project_dir=project_dir)
     if tts_manager.is_enabled():
         print_status("TTS enabled", "info")
         status_info = tts_manager.get_status()
