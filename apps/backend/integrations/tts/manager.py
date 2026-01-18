@@ -12,6 +12,7 @@ from typing import Optional, List, Dict, Union
 from .config import TTSConfig
 from .filters import OutputFilter
 from .voice_info import VoiceInfo
+from .voice_lock import VoiceLock
 from .providers.piper import PiperProvider
 from .providers.macos import MacOSProvider
 from .providers.system import SystemProvider
@@ -111,13 +112,14 @@ class TTSManager:
         """Check if TTS is enabled and available."""
         return self.config.is_enabled() and self.active_provider is not None
 
-    def speak(self, text: str, filter_content: bool = True) -> bool:
+    def speak(self, text: str, filter_content: bool = True, skip_lock: bool = False) -> bool:
         """
-        Speak arbitrary text.
+        Speak arbitrary text with cross-process coordination.
 
         Args:
             text: Text to speak
             filter_content: Whether to filter code blocks, markdown, etc.
+            skip_lock: Skip voice lock (use with caution - may cause overlapping audio)
 
         Returns:
             True if successful, False otherwise
@@ -141,21 +143,60 @@ class TTSManager:
             logger.debug("Text filtered to empty string, skipping TTS")
             return False
 
-        # Try active provider first
-        if self.active_provider and self.active_provider.speak(text):
-            return True
+        # Acquire voice lock unless skipped
+        if not skip_lock:
+            logger.debug("Checking voice queue...")
+            lock = VoiceLock()
+            lock_result = lock.wait_for_lock(timeout_seconds=10.0)
 
-        # Try fallback providers
-        for provider in self.providers:
-            if provider != self.active_provider:
-                logger.info(f"Trying fallback provider: {provider.get_name()}")
-                if provider.speak(text):
-                    # Update active provider on success
-                    self.active_provider = provider
+            if not lock_result["success"]:
+                if lock_result.get("timeout"):
+                    logger.warning("Timeout waiting for voice access")
+                    if lock_result.get("holder"):
+                        holder = lock_result["holder"]
+                        logger.warning(f"Lock held by: {holder['cli_id']} (PID: {holder['pid']})")
+                elif lock_result.get("holder"):
+                    holder = lock_result["holder"]
+                    logger.warning(f"Voice busy - held by {holder['cli_id']}")
+                return False
+
+            try:
+                # Try active provider first
+                if self.active_provider and self.active_provider.speak(text):
                     return True
 
-        logger.error("All TTS providers failed")
-        return False
+                # Try fallback providers
+                for provider in self.providers:
+                    if provider != self.active_provider:
+                        logger.info(f"Trying fallback provider: {provider.get_name()}")
+                        if provider.speak(text):
+                            # Update active provider on success
+                            self.active_provider = provider
+                            return True
+
+                logger.error("All TTS providers failed")
+                return False
+
+            finally:
+                # Always release lock when done
+                lock.release()
+        else:
+            # Skip lock - direct execution (may overlap)
+            # Try active provider first
+            if self.active_provider and self.active_provider.speak(text):
+                return True
+
+            # Try fallback providers
+            for provider in self.providers:
+                if provider != self.active_provider:
+                    logger.info(f"Trying fallback provider: {provider.get_name()}")
+                    if provider.speak(text):
+                        # Update active provider on success
+                        self.active_provider = provider
+                        return True
+
+            logger.error("All TTS providers failed")
+            return False
 
     def speak_phase(self, phase_name: str, description: Optional[str] = None) -> bool:
         """

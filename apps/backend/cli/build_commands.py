@@ -234,10 +234,11 @@ def handle_build_command(
         try:
             exit_code = asyncio.run(
                 ralph.build(
-                    spec_name=spec_dir.name,
+                    spec_dir=spec_dir,
+                    iterations=max_iterations or 5,  # Default to 5 iterations
                     model=model,
                     budget=budget,
-                    verbose=verbose,
+                    resume=False,  # TODO: Add resume support
                 )
             )
 
@@ -254,10 +255,9 @@ def handle_build_command(
             print_status(str(e), "error")
             print()
             print("To install Ralph CLI:")
-            print("  pip install ralph-cli")
+            print("  cd /path/to/ralph-cli && npm link")
             print()
-            print("Or use local installation by cloning Ralph CLI to:")
-            print("  apps/backend/ralph_cli/")
+            print("Or install from: https://github.com/tinnguyen/ralph-cli")
             sys.exit(1)
         except Exception as e:
             print_status(f"Ralph CLI build error: {e}", "error")
