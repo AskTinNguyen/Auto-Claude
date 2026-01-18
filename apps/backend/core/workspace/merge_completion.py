@@ -213,6 +213,156 @@ class MergeCompletionStorage:
             logger.error(f"Failed to get merge by ID: {e}")
             return None
 
+    def get_merges_by_strategy(
+        self,
+        strategy: Literal["fast-forward", "3-way", "ai-assisted", "manual"],
+    ) -> list[MergeCompletion]:
+        """
+        Get all merges that used a specific merge strategy.
+
+        Args:
+            strategy: The merge strategy to filter by
+
+        Returns:
+            List of MergeCompletion objects using the specified strategy
+        """
+        all_merges = self.get_merge_history()
+        return [m for m in all_merges if m.merge_strategy == strategy]
+
+    def get_merges_by_date_range(
+        self,
+        start_date: datetime,
+        end_date: datetime,
+    ) -> list[MergeCompletion]:
+        """
+        Get merges within a date range.
+
+        Args:
+            start_date: Start of date range (inclusive)
+            end_date: End of date range (inclusive)
+
+        Returns:
+            List of MergeCompletion objects within the date range
+        """
+        all_merges = self.get_merge_history()
+        return [
+            m for m in all_merges
+            if start_date <= m.timestamp <= end_date
+        ]
+
+    def get_successful_merges(self) -> list[MergeCompletion]:
+        """
+        Get all successful merges.
+
+        Returns:
+            List of successful MergeCompletion objects
+        """
+        all_merges = self.get_merge_history()
+        return [m for m in all_merges if m.success]
+
+    def get_failed_merges(self) -> list[MergeCompletion]:
+        """
+        Get all failed merges.
+
+        Returns:
+            List of failed MergeCompletion objects
+        """
+        all_merges = self.get_merge_history()
+        return [m for m in all_merges if not m.success]
+
+    def get_merges_with_conflicts(self) -> list[MergeCompletion]:
+        """
+        Get merges that had conflicts to resolve.
+
+        Returns:
+            List of MergeCompletion objects with conflicts_resolved > 0
+        """
+        all_merges = self.get_merge_history()
+        return [m for m in all_merges if m.conflicts_resolved > 0]
+
+    def get_ai_assisted_merges(self) -> list[MergeCompletion]:
+        """
+        Get merges that used AI assistance.
+
+        Returns:
+            List of MergeCompletion objects with ai_assisted_count > 0
+        """
+        all_merges = self.get_merge_history()
+        return [m for m in all_merges if m.ai_assisted_count > 0]
+
+    def get_files_merged_multiple_times(self) -> dict[str, list[str]]:
+        """
+        Get files that have been merged multiple times across different specs.
+
+        Returns:
+            Dictionary mapping file paths to list of merge IDs that touched them
+        """
+        all_merges = self.get_merge_history()
+        file_merges: dict[str, list[str]] = {}
+
+        for merge in all_merges:
+            for file_path in merge.resolved_files:
+                if file_path not in file_merges:
+                    file_merges[file_path] = []
+                file_merges[file_path].append(merge.merge_id)
+
+        # Only return files merged 2+ times
+        return {
+            file_path: merge_ids
+            for file_path, merge_ids in file_merges.items()
+            if len(merge_ids) > 1
+        }
+
+    def get_most_merged_files(self, limit: int = 10) -> list[tuple[str, int]]:
+        """
+        Get files most frequently involved in merges.
+
+        Args:
+            limit: Maximum number of files to return
+
+        Returns:
+            List of (file_path, merge_count) tuples, sorted by count descending
+        """
+        all_merges = self.get_merge_history()
+        file_counts: dict[str, int] = {}
+
+        for merge in all_merges:
+            for file_path in merge.resolved_files:
+                file_counts[file_path] = file_counts.get(file_path, 0) + 1
+
+        # Sort by count descending
+        sorted_files = sorted(
+            file_counts.items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )
+
+        return sorted_files[:limit]
+
+    def get_spec_merge_count(self, spec_name: str) -> int:
+        """
+        Get total number of merges for a specific spec.
+
+        Args:
+            spec_name: Name of the spec
+
+        Returns:
+            Number of times the spec has been merged
+        """
+        merges = self.get_merge_history(spec_name)
+        return len(merges)
+
+    def get_all_specs_merged(self) -> list[str]:
+        """
+        Get list of all unique spec names that have been merged.
+
+        Returns:
+            List of spec names
+        """
+        all_merges = self.get_merge_history()
+        spec_names = {m.spec_name for m in all_merges}
+        return sorted(spec_names)
+
     def get_merge_stats_summary(self, spec_name: str | None = None) -> dict:
         """
         Get summary statistics for merges.
@@ -234,6 +384,7 @@ class MergeCompletionStorage:
                 "total_ai_assisted": 0,
                 "total_files_merged": 0,
                 "average_duration": None,
+                "merge_strategies": {},
             }
 
         successful = [m for m in merges if m.success]
@@ -248,6 +399,12 @@ class MergeCompletionStorage:
         for merge in merges:
             all_files.update(merge.resolved_files)
 
+        # Count merge strategies
+        strategy_counts: dict[str, int] = {}
+        for merge in merges:
+            strategy = merge.merge_strategy
+            strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
+
         return {
             "total_merges": len(merges),
             "successful_merges": len(successful),
@@ -256,6 +413,7 @@ class MergeCompletionStorage:
             "total_ai_assisted": sum(m.ai_assisted_count for m in merges),
             "total_files_merged": len(all_files),
             "average_duration": avg_duration,
+            "merge_strategies": strategy_counts,
         }
 
     def _load_history(self) -> list[dict]:
