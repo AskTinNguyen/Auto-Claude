@@ -165,3 +165,51 @@ def load_patterns(spec_dir: Path) -> list[str]:
             patterns.append(line[2:].strip())
 
     return patterns
+
+
+def search_patterns_semantic(
+    spec_dir: Path,
+    query: str,
+    limit: int = 5,
+    language: str | None = None,
+    min_score: float = 0.5,
+) -> list[dict]:
+    """
+    Search for code patterns using semantic search via Graphiti.
+
+    Uses Graphiti's semantic search to find patterns relevant to the query.
+    Falls back to empty list if Graphiti is not enabled.
+
+    Args:
+        spec_dir: Path to spec directory
+        query: Search query (task description or pattern name)
+        limit: Maximum number of results (default: 5)
+        language: Filter by programming language (optional)
+        min_score: Minimum relevance score 0.0-1.0 (default: 0.5)
+
+    Returns:
+        List of pattern dictionaries with metadata and relevance scores
+
+    Example:
+        results = search_patterns_semantic(
+            spec_dir,
+            "How to handle API errors",
+            limit=3,
+            min_score=0.6
+        )
+        for pattern in results:
+            print(f"{pattern['pattern']} (score: {pattern['score']})")
+    """
+    if not is_graphiti_memory_enabled():
+        return []
+
+    try:
+        graphiti = get_graphiti_memory(spec_dir)
+        if graphiti:
+            return run_async(
+                graphiti.search_patterns(query, limit, language, min_score)
+            )
+    except Exception as e:
+        logger.warning(f"Graphiti pattern search failed: {e}")
+
+    return []
