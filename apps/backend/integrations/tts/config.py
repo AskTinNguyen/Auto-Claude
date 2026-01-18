@@ -13,6 +13,35 @@ from typing import Optional
 _PIPER_VOICE_DIR = Path.home() / ".local" / "share" / "piper-voices"
 
 
+def _get_original_project_root(project_dir: Path) -> Path:
+    """
+    Get the original project root, even if running in a worktree.
+
+    Worktrees are located at: <project>/.auto-claude/worktrees/tasks/<spec>/
+    This function detects if we're in a worktree and returns the original root.
+
+    Args:
+        project_dir: Current project directory (may be a worktree)
+
+    Returns:
+        Original project root directory
+    """
+    # Convert to absolute path
+    project_dir = project_dir.resolve()
+
+    # Check if we're in a worktree by looking for the pattern
+    # .auto-claude/worktrees/tasks/<spec-name>
+    parts = project_dir.parts
+    for i, part in enumerate(parts):
+        if part == ".auto-claude" and i + 2 < len(parts):
+            if parts[i + 1] == "worktrees" and parts[i + 2] == "tasks":
+                # Found worktree pattern - return the parent of .auto-claude
+                return Path(*parts[:i])
+
+    # Not in a worktree, return as-is
+    return project_dir
+
+
 def _resolve_piper_voice_name(short_name: str) -> str:
     """
     Resolve old-format short voice name to full model name.
@@ -92,8 +121,10 @@ class TTSConfig:
         )
 
         # Override with voice-config.json if available (for auto-speak integration)
+        # Always read from original project root, not worktree
         if project_dir:
-            voice_config_path = project_dir / ".ralph" / "voice-config.json"
+            original_root = _get_original_project_root(Path(project_dir))
+            voice_config_path = original_root / ".ralph" / "voice-config.json"
             if voice_config_path.exists():
                 try:
                     with open(voice_config_path, 'r') as f:
