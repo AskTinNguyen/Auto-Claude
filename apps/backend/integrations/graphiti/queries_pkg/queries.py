@@ -9,6 +9,7 @@ import logging
 from datetime import datetime, timezone
 
 from .schema import (
+    EPISODE_TYPE_CODE_PATTERN,
     EPISODE_TYPE_CODEBASE_DISCOVERY,
     EPISODE_TYPE_GOTCHA,
     EPISODE_TYPE_PATTERN,
@@ -196,6 +197,54 @@ class GraphitiQueries:
 
         except Exception as e:
             logger.warning(f"Failed to save gotcha: {e}")
+            return False
+
+    async def add_code_pattern(
+        self,
+        pattern: str,
+        language: str | None = None,
+        context: str | None = None,
+        example: str | None = None,
+    ) -> bool:
+        """
+        Save a code pattern to the knowledge graph.
+
+        Args:
+            pattern: Description of the code pattern
+            language: Programming language (optional)
+            context: Context where pattern applies (optional)
+            example: Code example demonstrating the pattern (optional)
+
+        Returns:
+            True if saved successfully
+        """
+        try:
+            from graphiti_core.nodes import EpisodeType
+
+            episode_content = {
+                "type": EPISODE_TYPE_CODE_PATTERN,
+                "spec_id": self.spec_context_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "pattern": pattern,
+                "language": language,
+                "context": context,
+                "example": example,
+            }
+
+            await self.client.graphiti.add_episode(
+                name=f"code_pattern_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}",
+                episode_body=json.dumps(episode_content),
+                source=EpisodeType.text,
+                source_description=f"Code pattern for {self.group_id}",
+                reference_time=datetime.now(timezone.utc),
+                group_id=self.group_id,
+            )
+
+            logger.info(f"Saved code pattern to Graphiti: {pattern[:50]}...")
+            return True
+
+        except Exception as e:
+            logger.warning(f"Failed to save code pattern: {e}")
             return False
 
     async def add_task_outcome(
