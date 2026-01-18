@@ -54,6 +54,91 @@ python run.py --spec 001
 | `--list-worktrees` | List all worktrees |
 | `--help` | Show all options |
 
+## Merge Completion Tracking
+
+Auto Claude automatically tracks all merge operations to provide visibility into merge history, conflicts resolved, and AI assistance used.
+
+### What Gets Tracked
+
+Each successful merge records:
+- **Metadata**: Spec name, timestamp, unique merge ID
+- **Files**: List of all files merged
+- **Conflict Statistics**: Conflicts resolved, AI-assisted merges, auto-merged files
+- **Merge Strategy**: fast-forward, 3-way, ai-assisted, or manual
+- **Performance**: Optional duration in seconds
+- **Success Status**: Whether merge completed successfully
+
+### Storage Location
+
+Merge history is stored in JSON format:
+```
+.auto-claude/merge-history/merge_history.json
+```
+
+This file is automatically created on the first merge and persists across all specs.
+
+### Querying Merge History
+
+Use the `MergeCompletionStorage` API to query merge data:
+
+```python
+from core.workspace.merge_completion import MergeCompletionStorage
+
+# Initialize storage
+storage = MergeCompletionStorage(project_dir=Path("/path/to/project"))
+
+# Get all merges for a specific spec
+spec_merges = storage.get_merge_history(spec_name="001-auth-feature")
+
+# Get recent merges (default: 10 most recent)
+recent = storage.get_recent_merges(limit=20)
+
+# Get merges by strategy
+ai_assisted = storage.get_merges_by_strategy("ai-assisted")
+
+# Get successful vs failed merges
+successful = storage.get_successful_merges()
+failed = storage.get_failed_merges()
+
+# Get merges with conflicts
+conflict_merges = storage.get_merges_with_conflicts()
+
+# Get summary statistics
+stats = storage.get_merge_stats_summary(spec_name="001-auth-feature")
+# Returns: total_merges, successful_merges, failed_merges,
+#          total_conflicts_resolved, total_ai_assisted,
+#          total_files_merged, average_duration, merge_strategies
+```
+
+### Advanced Queries
+
+```python
+# Find files merged multiple times
+multi_merged = storage.get_files_merged_multiple_times()
+# Returns: {file_path: [merge_id1, merge_id2, ...]}
+
+# Get most frequently merged files
+hotspots = storage.get_most_merged_files(limit=10)
+# Returns: [(file_path, merge_count), ...]
+
+# Get merges within date range
+from datetime import datetime
+start = datetime(2024, 1, 1)
+end = datetime(2024, 12, 31)
+year_merges = storage.get_merges_by_date_range(start, end)
+
+# Get specific merge by ID
+merge = storage.get_merge_by_id("uuid-here")
+```
+
+### UI Integration
+
+The Electron frontend automatically displays merge history in the UI. Merge data is read from the JSON file and displayed with:
+- Merge timeline
+- Conflict statistics
+- AI assistance metrics
+- Success/failure status
+
 ## Configuration
 
 Optional `.env` settings:
