@@ -1,0 +1,57 @@
+{
+  "qualityScore": {
+    "title": "Quality Score",
+    "score": "Score",
+    "grade": "Grade",
+    "breakdown": "Quality Breakdown",
+    "issues": "Issues",
+    "recommendations": "Recommendations",
+    "noIssues": "No issues found",
+    "noRecommendations": "No recommendations",
+    "categories": {
+      "security": "Security",
+      "performance": "Performance",
+      "maintainability": "Maintainability",
+      "documentation": "Documentation",
+      "testing": "Testing"
+    }
+  },
+  "tts": {
+    "title": "Text-to-Speech",
+    "enabled": "Enable TTS",
+    "enabledDescription": "Read agent responses aloud",
+    "provider": "TTS Provider",
+    "providerDescription": "Select text-to-speech engine",
+    "voice": "Voice",
+    "voiceDescription": "Select voice for speech synthesis",
+    "testVoice": "Test Voice",
+    "testing": "Testing...",
+    "providers": {
+      "piper": "Piper (Neural)",
+      "macos": "macOS System",
+      "system": "System Default"
+    },
+    "selectVoice": "Select a voice",
+    "noVoicesAvailable": "No voices available"
+  },
+  "monitoring": {
+    "title": "Monitoring",
+    "costTracking": "Cost Tracking",
+    "heartbeat": "Heartbeat Status",
+    "recentEvents": "Recent Events",
+    "totalCost": "Total Cost",
+    "tokenUsage": "Token Usage",
+    "inputTokens": "Input Tokens",
+    "outputTokens": "Output Tokens",
+    "status": {
+      "healthy": "Healthy",
+      "degraded": "Degraded",
+      "down": "Down",
+      "unknown": "Unknown"
+    },
+    "noEvents": "No recent events",
+    "costTrends": "Cost Trends",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days"
+  }
+}

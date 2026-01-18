@@ -45,6 +45,7 @@ import { Changelog } from './components/Changelog';
 import { Worktrees } from './components/Worktrees';
 import { AgentTools } from './components/AgentTools';
 import { ScratchPadView } from './components/scratchpad/ScratchPadView';
+import { MonitoringPanel } from './components/analytics/MonitoringPanel';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { RateLimitModal } from './components/RateLimitModal';
 import { SDKRateLimitModal } from './components/SDKRateLimitModal';
@@ -894,6 +895,9 @@ export function App() {
                 )}
                 {activeView === 'scratchpad' && <ScratchPadView />}
                 {activeView === 'agent-tools' && <AgentTools />}
+                {activeView === 'monitoring' && (activeProjectId || selectedProjectId) && (
+                  <MonitoringPanel projectId={activeProjectId || selectedProjectId!} />
+                )}
               </>
             ) : (
               <WelcomeScreen

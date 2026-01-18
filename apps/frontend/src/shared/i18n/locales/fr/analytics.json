@@ -1,0 +1,57 @@
+{
+  "qualityScore": {
+    "title": "Score de Qualité",
+    "score": "Score",
+    "grade": "Note",
+    "breakdown": "Détail de la Qualité",
+    "issues": "Problèmes",
+    "recommendations": "Recommandations",
+    "noIssues": "Aucun problème trouvé",
+    "noRecommendations": "Aucune recommandation",
+    "categories": {
+      "security": "Sécurité",
+      "performance": "Performance",
+      "maintainability": "Maintenabilité",
+      "documentation": "Documentation",
+      "testing": "Tests"
+    }
+  },
+  "tts": {
+    "title": "Synthèse Vocale",
+    "enabled": "Activer TTS",
+    "enabledDescription": "Lire les réponses de l'agent à voix haute",
+    "provider": "Fournisseur TTS",
+    "providerDescription": "Sélectionner le moteur de synthèse vocale",
+    "voice": "Voix",
+    "voiceDescription": "Sélectionner la voix pour la synthèse vocale",
+    "testVoice": "Tester la Voix",
+    "testing": "Test en cours...",
+    "providers": {
+      "piper": "Piper (Neural)",
+      "macos": "Système macOS",
+      "system": "Système par défaut"
+    },
+    "selectVoice": "Sélectionner une voix",
+    "noVoicesAvailable": "Aucune voix disponible"
+  },
+  "monitoring": {
+    "title": "Surveillance",
+    "costTracking": "Suivi des Coûts",
+    "heartbeat": "État du Système",
+    "recentEvents": "Événements Récents",
+    "totalCost": "Coût Total",
+    "tokenUsage": "Utilisation des Tokens",
+    "inputTokens": "Tokens d'Entrée",
+    "outputTokens": "Tokens de Sortie",
+    "status": {
+      "healthy": "Sain",
+      "degraded": "Dégradé",
+      "down": "Hors Service",
+      "unknown": "Inconnu"
+    },
+    "noEvents": "Aucun événement récent",
+    "costTrends": "Tendances des Coûts",
+    "last7Days": "7 Derniers Jours",
+    "last30Days": "30 Derniers Jours"
+  }
+}
