@@ -1,6 +1,6 @@
 import { ipcMain, BrowserWindow, shell, app } from 'electron';
 import { IPC_CHANNELS, AUTO_BUILD_PATHS, DEFAULT_APP_SETTINGS, DEFAULT_FEATURE_MODELS, DEFAULT_FEATURE_THINKING, MODEL_ID_MAP, THINKING_BUDGET_MAP, getSpecsDir } from '../../../shared/constants';
-import type { IPCResult, WorktreeStatus, WorktreeDiff, WorktreeDiffFile, WorktreeMergeResult, WorktreeDiscardResult, WorktreeListResult, WorktreeListItem, WorktreeCreatePROptions, WorktreeCreatePRResult, SupportedIDE, SupportedTerminal, AppSettings } from '../../../shared/types';
+import type { IPCResult, WorktreeStatus, WorktreeDiff, WorktreeDiffFile, WorktreeMergeResult, WorktreeDiscardResult, WorktreeListResult, WorktreeListItem, WorktreeCreatePROptions, WorktreeCreatePRResult, SupportedIDE, SupportedTerminal, AppSettings, MergeHistoryRecord } from '../../../shared/types';
 import path from 'path';
 import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
 import { execSync, execFileSync, spawn, spawnSync, exec, execFile } from 'child_process';
@@ -3144,6 +3144,60 @@ export function registerWorktreeHandlers(
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to create PR'
+        };
+      }
+    }
+  );
+
+  /**
+   * Get merge completion history for a task
+   */
+  ipcMain.handle(
+    IPC_CHANNELS.TASK_WORKTREE_MERGE_HISTORY,
+    async (_, taskId: string): Promise<IPCResult<MergeHistoryRecord[]>> => {
+      try {
+        const { task, project } = findTaskAndProject(taskId);
+        if (!task || !project) {
+          return { success: false, error: 'Task not found' };
+        }
+
+        // Merge history is stored in .auto-claude/merge-history/merge_history.json
+        const mergeHistoryFile = path.join(project.path, '.auto-claude', 'merge-history', 'merge_history.json');
+
+        if (!existsSync(mergeHistoryFile)) {
+          // No merge history yet - return empty array
+          return {
+            success: true,
+            data: []
+          };
+        }
+
+        try {
+          const content = readFileSync(mergeHistoryFile, 'utf-8');
+          const allMerges: MergeHistoryRecord[] = JSON.parse(content);
+
+          // Filter by spec name (task.specId)
+          const taskMerges = allMerges.filter(merge => merge.spec_name === task.specId);
+
+          // Sort by timestamp descending (most recent first)
+          taskMerges.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+          return {
+            success: true,
+            data: taskMerges
+          };
+        } catch (parseError) {
+          console.error('[MERGE_HISTORY] Failed to parse merge history:', parseError);
+          return {
+            success: false,
+            error: 'Failed to parse merge history file'
+          };
+        }
+      } catch (error) {
+        console.error('[MERGE_HISTORY] Exception in handler:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to get merge history'
         };
       }
     }

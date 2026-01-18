@@ -414,6 +414,24 @@ export interface WorktreeDiscardResult {
 }
 
 /**
+ * Merge completion history record
+ */
+export interface MergeHistoryRecord {
+  merge_id: string;
+  spec_name: string;
+  timestamp: string;
+  resolved_files: string[];
+  conflicts_resolved: number;
+  ai_assisted_count: number;
+  auto_merged_count: number;
+  git_conflicts: number;
+  merge_strategy: 'fast-forward' | '3-way' | 'ai-assisted' | 'manual';
+  success: boolean;
+  error_message?: string | null;
+  duration_seconds?: number | null;
+}
+
+/**
  * Options for creating a PR from a worktree
  */
 export interface WorktreeCreatePROptions {
