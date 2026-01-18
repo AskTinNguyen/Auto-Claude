@@ -501,6 +501,207 @@ class PatternLibrary:
             } if most_successful else None,
         }
 
+    def export_patterns(self, include_metadata: bool = True) -> dict:
+        """
+        Export all patterns as a JSON-serializable dictionary for team sharing.
+
+        Args:
+            include_metadata: Whether to include usage analytics and metadata
+
+        Returns:
+            Dictionary with exported patterns and library metadata
+        """
+        all_patterns = self.get_all_patterns()
+
+        exported_data = {
+            "export_version": "1.0",
+            "exported_at": datetime.utcnow().isoformat(),
+            "total_patterns": len(all_patterns),
+            "patterns": [],
+        }
+
+        for pattern in all_patterns:
+            pattern_dict = {
+                "id": pattern.id,
+                "name": pattern.name,
+                "description": pattern.description,
+                "category": pattern.category.value,
+                "pattern_type": pattern.pattern_type,
+                "code_example": pattern.code_example,
+                "usage_context": pattern.usage_context,
+                "keywords": pattern.keywords,
+                "files_involved": pattern.files_involved,
+                "related_patterns": pattern.related_patterns,
+            }
+
+            if include_metadata:
+                pattern_dict["metadata"] = {
+                    "created_at": pattern.metadata.created_at,
+                    "updated_at": pattern.metadata.updated_at,
+                    "author": pattern.metadata.author,
+                    "usage_count": pattern.metadata.usage_count,
+                    "success_rate": pattern.metadata.success_rate,
+                    "last_used": pattern.metadata.last_used,
+                    "source_task_id": pattern.metadata.source_task_id,
+                    "tags": pattern.metadata.tags,
+                }
+
+            exported_data["patterns"].append(pattern_dict)
+
+        return exported_data
+
+    def import_patterns(
+        self,
+        imported_data: dict,
+        merge_strategy: str = "skip",
+        reset_usage: bool = True,
+    ) -> dict:
+        """
+        Import patterns from an exported JSON dictionary.
+
+        Args:
+            imported_data: Dictionary from export_patterns()
+            merge_strategy: How to handle conflicts:
+                - "skip": Skip patterns that already exist (default)
+                - "update": Update existing patterns with imported data
+                - "rename": Rename imported patterns if ID conflicts occur
+            reset_usage: Whether to reset usage stats for imported patterns
+
+        Returns:
+            Dictionary with import results (imported, skipped, updated counts)
+        """
+        if not isinstance(imported_data, dict):
+            raise ValueError("imported_data must be a dictionary")
+
+        if "patterns" not in imported_data:
+            raise ValueError("imported_data missing 'patterns' key")
+
+        results = {
+            "imported": 0,
+            "skipped": 0,
+            "updated": 0,
+            "errors": [],
+        }
+
+        for pattern_data in imported_data["patterns"]:
+            try:
+                pattern_id = pattern_data["id"]
+                existing_pattern = self.get_pattern(pattern_id)
+
+                # Handle merge strategy
+                if existing_pattern:
+                    if merge_strategy == "skip":
+                        results["skipped"] += 1
+                        continue
+                    elif merge_strategy == "update":
+                        # Update existing pattern
+                        self._update_pattern_from_import(
+                            pattern_data, reset_usage=reset_usage
+                        )
+                        results["updated"] += 1
+                        continue
+                    elif merge_strategy == "rename":
+                        # Generate new ID
+                        pattern_id = f"{pattern_id}-imported-{datetime.utcnow().timestamp()}"
+                        pattern_data["id"] = pattern_id
+
+                # Create new pattern
+                pattern = self._create_pattern_from_import(
+                    pattern_data, reset_usage=reset_usage
+                )
+                self.add_pattern(pattern)
+                results["imported"] += 1
+
+            except Exception as e:
+                results["errors"].append(f"Pattern {pattern_data.get('id', 'unknown')}: {e}")
+                continue
+
+        return results
+
+    def _create_pattern_from_import(
+        self, pattern_data: dict, reset_usage: bool
+    ) -> CodePattern:
+        """Create a CodePattern instance from imported data."""
+        # Import metadata if present
+        metadata_data = pattern_data.get("metadata", {})
+
+        if reset_usage:
+            # Reset usage statistics
+            metadata_data["usage_count"] = 0
+            metadata_data["success_rate"] = 1.0
+            metadata_data["last_used"] = None
+
+        # Ensure required metadata fields
+        now = datetime.utcnow().isoformat()
+        metadata = PatternMetadata(
+            created_at=metadata_data.get("created_at", now),
+            updated_at=now,
+            author=metadata_data.get("author", "imported"),
+            usage_count=metadata_data.get("usage_count", 0),
+            success_rate=metadata_data.get("success_rate", 1.0),
+            last_used=metadata_data.get("last_used"),
+            source_task_id=metadata_data.get("source_task_id"),
+            tags=metadata_data.get("tags", []),
+        )
+
+        # Create pattern
+        pattern = CodePattern(
+            id=pattern_data["id"],
+            name=pattern_data["name"],
+            description=pattern_data["description"],
+            category=PatternCategory(pattern_data["category"]),
+            pattern_type=pattern_data["pattern_type"],
+            code_example=pattern_data["code_example"],
+            usage_context=pattern_data.get("usage_context", ""),
+            metadata=metadata,
+            files_involved=pattern_data.get("files_involved", []),
+            related_patterns=pattern_data.get("related_patterns", []),
+            keywords=pattern_data.get("keywords", []),
+        )
+
+        return pattern
+
+    def _update_pattern_from_import(
+        self, pattern_data: dict, reset_usage: bool
+    ) -> None:
+        """Update an existing pattern with imported data."""
+        pattern_id = pattern_data["id"]
+        pattern = self.get_pattern(pattern_id)
+
+        if pattern is None:
+            return
+
+        # Update fields
+        pattern.name = pattern_data["name"]
+        pattern.description = pattern_data["description"]
+        pattern.category = PatternCategory(pattern_data["category"])
+        pattern.pattern_type = pattern_data["pattern_type"]
+        pattern.code_example = pattern_data["code_example"]
+        pattern.usage_context = pattern_data.get("usage_context", "")
+        pattern.files_involved = pattern_data.get("files_involved", [])
+        pattern.related_patterns = pattern_data.get("related_patterns", [])
+        pattern.keywords = pattern_data.get("keywords", [])
+
+        # Update metadata
+        if not reset_usage:
+            # Preserve usage stats
+            metadata_data = pattern_data.get("metadata", {})
+            if metadata_data:
+                pattern.metadata.usage_count = metadata_data.get(
+                    "usage_count", pattern.metadata.usage_count
+                )
+                pattern.metadata.success_rate = metadata_data.get(
+                    "success_rate", pattern.metadata.success_rate
+                )
+                pattern.metadata.last_used = metadata_data.get(
+                    "last_used", pattern.metadata.last_used
+                )
+
+        pattern.metadata.updated_at = datetime.utcnow().isoformat()
+
+        # Save updated pattern
+        self._save_pattern(pattern)
+
 
 def categorize_pattern(
     pattern_type: str,
@@ -720,3 +921,73 @@ def get_pattern_analytics(project_dir: str | Path, pattern_id: Optional[str] = N
         if result is None:
             raise ValueError(f"Pattern '{pattern_id}' not found")
         return result
+
+
+def export_patterns(project_dir: str | Path, include_metadata: bool = True) -> dict:
+    """
+    Export all patterns from the library for team sharing.
+
+    This is a convenience function that creates a PatternLibrary instance
+    and exports all patterns to a JSON-serializable dictionary.
+
+    Args:
+        project_dir: Path to project directory
+        include_metadata: Whether to include usage analytics and metadata
+
+    Returns:
+        Dictionary with exported patterns and metadata
+
+    Example:
+        >>> # Export patterns to share with team
+        >>> exported = export_patterns("/path/to/project")
+        >>> print(f"Exported {exported['total_patterns']} patterns")
+        >>>
+        >>> # Save to file
+        >>> import json
+        >>> with open("patterns_export.json", "w") as f:
+        ...     json.dump(exported, f, indent=2)
+    """
+    library = PatternLibrary(project_dir)
+    return library.export_patterns(include_metadata=include_metadata)
+
+
+def import_patterns(
+    project_dir: str | Path,
+    imported_data: dict,
+    merge_strategy: str = "skip",
+    reset_usage: bool = True,
+) -> dict:
+    """
+    Import patterns from an exported dictionary.
+
+    This is a convenience function that creates a PatternLibrary instance
+    and imports patterns from a previously exported dictionary.
+
+    Args:
+        project_dir: Path to project directory
+        imported_data: Dictionary from export_patterns() or loaded from JSON file
+        merge_strategy: How to handle conflicts:
+            - "skip": Skip patterns that already exist (default)
+            - "update": Update existing patterns with imported data
+            - "rename": Rename imported patterns if ID conflicts occur
+        reset_usage: Whether to reset usage stats for imported patterns
+
+    Returns:
+        Dictionary with import results (imported, skipped, updated counts)
+
+    Example:
+        >>> # Load patterns from file
+        >>> import json
+        >>> with open("patterns_export.json", "r") as f:
+        ...     imported_data = json.load(f)
+        >>>
+        >>> # Import patterns
+        >>> results = import_patterns("/path/to/project", imported_data)
+        >>> print(f"Imported: {results['imported']}, Skipped: {results['skipped']}")
+    """
+    library = PatternLibrary(project_dir)
+    return library.import_patterns(
+        imported_data=imported_data,
+        merge_strategy=merge_strategy,
+        reset_usage=reset_usage,
+    )
