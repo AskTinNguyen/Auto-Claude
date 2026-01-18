@@ -412,19 +412,24 @@ export function App() {
       }
     };
 
-    // Apply color theme via data-theme attribute
-    // Validate colorTheme against known themes, fallback to 'default' if invalid
+    // Apply color theme via class name
+    // Validate colorTheme against known themes, fallback to 'rams' (default) if invalid
     const validThemeIds = COLOR_THEMES.map((t) => t.id);
-    const rawColorTheme = settings.colorTheme ?? 'default';
+    const rawColorTheme = settings.colorTheme ?? 'rams';
     const colorTheme: ColorTheme = validThemeIds.includes(rawColorTheme as ColorTheme)
       ? (rawColorTheme as ColorTheme)
-      : 'default';
+      : 'rams';
 
-    if (colorTheme === 'default') {
-      root.removeAttribute('data-theme');
-    } else {
-      root.setAttribute('data-theme', colorTheme);
+    // Remove all color theme classes
+    root.classList.remove('beige', 'cool');
+
+    // Apply color theme class (rams is default :root, no class needed)
+    if (colorTheme === 'beige') {
+      root.classList.add('beige');
+    } else if (colorTheme === 'cool') {
+      root.classList.add('cool');
     }
+    // 'rams' theme uses :root styles (no class needed)
 
     applyTheme();
 
