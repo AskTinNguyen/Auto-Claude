@@ -163,5 +163,13 @@
     "downloadError": "Failed to download update",
     "claudeCodeChangelog": "View Claude Code Changelog",
     "claudeCodeChangelogAriaLabel": "View Claude Code Changelog (opens in new window)"
+  },
+  "lanQR": {
+    "title": "Connect Mobile Device",
+    "description": "Scan the QR code with your mobile device to connect to Auto Claude",
+    "manualEntry": "Or enter this URL manually:",
+    "instructions": "Open your mobile browser and scan the QR code or enter the URL above to access Auto Claude on your mobile device.",
+    "notAvailable": "Connection URL Not Available",
+    "notAvailableDescription": "Unable to generate a connection URL. Make sure the LAN server is running and you're connected to a network."
   }
 }

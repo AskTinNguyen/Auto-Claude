@@ -163,5 +163,13 @@
     "downloadError": "Échec du téléchargement de la mise à jour",
     "claudeCodeChangelog": "Voir le journal des modifications Claude Code",
     "claudeCodeChangelogAriaLabel": "Voir le journal des modifications Claude Code (s'ouvre dans une nouvelle fenêtre)"
+  },
+  "lanQR": {
+    "title": "Connecter un appareil mobile",
+    "description": "Scannez le code QR avec votre appareil mobile pour vous connecter à Auto Claude",
+    "manualEntry": "Ou entrez cette URL manuellement :",
+    "instructions": "Ouvrez votre navigateur mobile et scannez le code QR ou entrez l'URL ci-dessus pour accéder à Auto Claude sur votre appareil mobile.",
+    "notAvailable": "URL de connexion non disponible",
+    "notAvailableDescription": "Impossible de générer une URL de connexion. Assurez-vous que le serveur LAN est en cours d'exécution et que vous êtes connecté à un réseau."
   }
 }
