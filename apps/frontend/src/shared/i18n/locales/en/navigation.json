@@ -30,7 +30,7 @@
     "help": "Help & Feedback"
   },
   "messages": {
-    "initializeToCreateTasks": "Initialize Auto Claude to create tasks"
+    "initializeToCreateTasks": "Initialize Auto CC to create tasks"
   },
   "updateBanner": {
     "title": "Update Available",

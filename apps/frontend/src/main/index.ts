@@ -244,10 +244,10 @@ function createWindow(): void {
 }
 
 // Set app name before ready (for dock tooltip on macOS in dev mode)
-app.setName('Auto Claude');
+app.setName('Auto CC');
 if (process.platform === 'darwin') {
   // Force the name to appear in dock on macOS
-  app.name = 'Auto Claude';
+  app.name = 'Auto CC';
 }
 
 // Fix Windows GPU cache permission errors (0x5 Access Denied)
