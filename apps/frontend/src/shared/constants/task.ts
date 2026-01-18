@@ -29,15 +29,15 @@ export const TASK_STATUS_LABELS: Record<TaskStatusColumn | 'pr_created', string>
   pr_created: 'columns.pr_created'
 };
 
-// Status colors for UI
+// Status colors for UI (Rams Design System)
 // Note: pr_created maps to 'done' column in Kanban view (see KanbanBoard.tsx)
 export const TASK_STATUS_COLORS: Record<TaskStatusColumn | 'pr_created', string> = {
-  backlog: 'bg-muted text-muted-foreground',
-  in_progress: 'bg-info/10 text-info',
-  ai_review: 'bg-warning/10 text-warning',
-  human_review: 'bg-purple-500/10 text-purple-400',
-  done: 'bg-success/10 text-success',
-  pr_created: 'bg-info/10 text-info'
+  backlog: 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+  in_progress: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  ai_review: 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+  human_review: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+  done: 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+  pr_created: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
 };
 
 // ============================================
@@ -66,12 +66,12 @@ export const EXECUTION_PHASE_LABELS: Record<string, string> = {
   failed: 'Failed'
 };
 
-// Execution phase colors (for progress bars and indicators)
+// Execution phase colors (for progress bars and indicators - Rams Design System)
 export const EXECUTION_PHASE_COLORS: Record<string, string> = {
-  idle: 'bg-muted text-muted-foreground',
-  planning: 'bg-amber-500 text-amber-50',
+  idle: 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+  planning: 'bg-amber-500/90 text-white dark:bg-amber-600/90',
   coding: 'bg-info text-info-foreground',
-  qa_review: 'bg-purple-500 text-purple-50',
+  qa_review: 'bg-purple-500/90 text-white dark:bg-purple-600/90',
   qa_fixing: 'bg-warning text-warning-foreground',
   complete: 'bg-success text-success-foreground',
   failed: 'bg-destructive text-destructive-foreground'
