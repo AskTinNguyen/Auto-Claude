@@ -29,6 +29,7 @@ _spec.loader.exec_module(_workspace_module)
 merge_existing_build = _workspace_module.merge_existing_build
 _run_parallel_merges = _workspace_module._run_parallel_merges
 _record_merge_completion = _workspace_module._record_merge_completion
+get_merge_history = _workspace_module.get_merge_history
 AI_MERGE_SYSTEM_PROMPT = _workspace_module.AI_MERGE_SYSTEM_PROMPT
 _build_merge_prompt = _workspace_module._build_merge_prompt
 _check_git_conflicts = _workspace_module._check_git_conflicts
@@ -113,6 +114,7 @@ __all__ = [
     "merge_existing_build",
     "_run_parallel_merges",  # Private but used internally
     "_record_merge_completion",  # Internal merge tracking (ACS-XXX)
+    "get_merge_history",  # Public API for merge history retrieval
     "AI_MERGE_SYSTEM_PROMPT",  # System prompt for AI merge (ACS-194)
     "_build_merge_prompt",  # Internal prompt builder (ACS-194)
     "_check_git_conflicts",  # Internal git conflict detection (ACS-224)

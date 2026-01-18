@@ -2175,3 +2175,67 @@ def _record_merge_completion(
             f"Failed to record merge completion for {spec_name}: {e}",
         )
         # Non-critical error - merge already succeeded, just tracking failed
+
+
+def get_merge_history(
+    spec_name: str | None = None,
+    project_dir: Path | None = None,
+) -> list[dict]:
+    """
+    Get merge history for frontend consumption via IPC.
+
+    This is the public API endpoint that returns merge completion
+    records as dictionaries suitable for JSON serialization and
+    display in the frontend UI.
+
+    Args:
+        spec_name: Optional spec name to filter by. If None, returns all merges.
+        project_dir: Root directory of the project. If None, uses current directory.
+
+    Returns:
+        List of merge completion dictionaries, sorted by timestamp (newest first).
+        Each dictionary contains:
+        - merge_id: Unique identifier for the merge
+        - spec_name: Name of the spec that was merged
+        - timestamp: ISO format timestamp
+        - resolved_files: List of file paths merged
+        - conflicts_resolved: Number of conflicts resolved
+        - ai_assisted_count: Number of files merged with AI assistance
+        - auto_merged_count: Number of files auto-merged
+        - git_conflicts: Number of git merge conflicts
+        - merge_strategy: Strategy used ('fast-forward', '3-way', 'ai-assisted', 'manual')
+        - success: Whether the merge succeeded
+        - error_message: Optional error message if failed
+        - duration_seconds: Optional merge duration
+    """
+    try:
+        # Import merge completion storage
+        from core.workspace.merge_completion import MergeCompletionStorage
+
+        # Initialize storage
+        if project_dir is None:
+            project_dir = Path.cwd()
+
+        storage = MergeCompletionStorage(project_dir=project_dir)
+
+        # Get merge history (optionally filtered by spec)
+        merges = storage.get_merge_history(spec_name=spec_name)
+
+        # Convert to dictionaries for JSON serialization
+        merge_dicts = [merge.to_dict() for merge in merges]
+
+        debug(
+            MODULE,
+            f"Retrieved {len(merge_dicts)} merge records"
+            + (f" for spec '{spec_name}'" if spec_name else ""),
+        )
+
+        return merge_dicts
+
+    except Exception as e:
+        debug_error(
+            MODULE,
+            f"Failed to retrieve merge history: {e}",
+        )
+        # Return empty list on error to avoid breaking the frontend
+        return []
