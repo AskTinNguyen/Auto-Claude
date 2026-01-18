@@ -12,6 +12,7 @@ EPISODE_TYPE_GOTCHA = "gotcha"
 EPISODE_TYPE_TASK_OUTCOME = "task_outcome"
 EPISODE_TYPE_QA_RESULT = "qa_result"
 EPISODE_TYPE_HISTORICAL_CONTEXT = "historical_context"
+EPISODE_TYPE_CODE_PATTERN = "code_pattern"
 
 # Maximum results to return for context queries (avoid overwhelming agent context)
 MAX_CONTEXT_RESULTS = 10
