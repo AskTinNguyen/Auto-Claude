@@ -59,6 +59,7 @@ from ui import (
 
 from .base import AUTO_CONTINUE_DELAY_SECONDS, HUMAN_INTERVENTION_FILE
 from .memory_manager import debug_memory_system_status, get_graphiti_context
+from .pattern_extractor import extract_patterns_from_task
 from .session import post_session_processing, run_agent_session
 from .utils import (
     find_phase_for_subtask,
@@ -521,6 +522,27 @@ async def run_autonomous_agent(
             if linear_task and linear_task.task_id:
                 await linear_build_complete(spec_dir)
                 print_status("Linear notified: build complete, ready for QA", "success")
+
+            # Extract patterns from completed task
+            try:
+                print()  # Add spacing before pattern extraction
+                task_id = spec_dir.name  # e.g., "007-code-patterns-library"
+                patterns = await extract_patterns_from_task(
+                    project_dir=project_dir,
+                    spec_dir=spec_dir,
+                    task_id=task_id,
+                    model=model,
+                    verbose=verbose,
+                )
+                if patterns:
+                    print_status(
+                        f"Extracted {len(patterns)} reusable patterns from this build",
+                        "success",
+                    )
+            except Exception as e:
+                # Don't fail the build if pattern extraction fails
+                logger.warning(f"Pattern extraction failed: {e}")
+                print_status(f"Pattern extraction skipped: {e}", "warning")
 
             break
 
