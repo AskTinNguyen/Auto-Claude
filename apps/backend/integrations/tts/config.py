@@ -88,7 +88,7 @@ class TTSConfig:
     macos_rate: int = 200  # Words per minute
 
     # General settings
-    max_length: int = 500  # Max characters to speak
+    max_length: int = 500  # Max characters to speak (legacy - use mode-based now)
     announce_phases: bool = True  # Announce phase transitions
     announce_subtasks: bool = True  # Announce subtask completions
     announce_qa: bool = True  # Announce QA results
@@ -98,6 +98,13 @@ class TTSConfig:
     filter_markdown: bool = True
     filter_file_paths: bool = True
     filter_urls: bool = True
+
+    # AI Summarization (Ollama)
+    summarization_mode: str = "adaptive"  # 'adaptive', 'short', 'medium', 'full'
+    fallback_mode: str = "short"  # Mode to use if adaptive detection fails
+    ollama_url: str = "http://localhost:11434"  # Ollama API endpoint
+    ollama_model: str = "qwen2.5:1.5b"  # Ollama model for summarization
+    enable_ai_summarization: bool = True  # Use AI summarization vs simple truncation
 
     @classmethod
     def from_env(cls, project_dir: Optional[Path] = None) -> "TTSConfig":
@@ -118,6 +125,12 @@ class TTSConfig:
             filter_markdown=os.getenv("TTS_FILTER_MARKDOWN", "true").lower() == "true",
             filter_file_paths=os.getenv("TTS_FILTER_PATHS", "true").lower() == "true",
             filter_urls=os.getenv("TTS_FILTER_URLS", "true").lower() == "true",
+            # AI Summarization settings
+            summarization_mode=os.getenv("TTS_SUMMARIZATION_MODE", "adaptive"),
+            fallback_mode=os.getenv("TTS_FALLBACK_MODE", "short"),
+            ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
+            ollama_model=os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b"),
+            enable_ai_summarization=os.getenv("TTS_ENABLE_AI_SUMMARIZATION", "true").lower() == "true",
         )
 
         # Override with voice-config.json if available (for auto-speak integration)

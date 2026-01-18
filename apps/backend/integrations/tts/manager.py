@@ -16,6 +16,7 @@ from .voice_lock import VoiceLock
 from .providers.piper import PiperProvider
 from .providers.macos import MacOSProvider
 from .providers.system import SystemProvider
+from .summarizer import summarize_for_tts
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ class TTSManager:
         """Check if TTS is enabled and available."""
         return self.config.is_enabled() and self.active_provider is not None
 
-    def speak(self, text: str, filter_content: bool = True, skip_lock: bool = False) -> bool:
+    def speak(self, text: str, filter_content: bool = True, skip_lock: bool = False, user_question: Optional[str] = None) -> bool:
         """
         Speak arbitrary text with cross-process coordination.
 
@@ -120,6 +121,7 @@ class TTSManager:
             text: Text to speak
             filter_content: Whether to filter code blocks, markdown, etc.
             skip_lock: Skip voice lock (use with caution - may cause overlapping audio)
+            user_question: Optional user question for context-aware summarization
 
         Returns:
             True if successful, False otherwise
@@ -130,15 +132,24 @@ class TTSManager:
         if not text or not text.strip():
             return False
 
-        # Filter content if requested
+        # Process text based on summarization settings
         if filter_content:
-            text = self.filter.filter(text)
+            if self.config.enable_ai_summarization:
+                # Use AI-powered summarization with context awareness
+                text, mode_used = summarize_for_tts(
+                    response_text=text,
+                    user_question=user_question,
+                    mode=self.config.summarization_mode,
+                    fallback_mode=self.config.fallback_mode
+                )
+                logger.debug(f"AI summarization used mode: {mode_used}")
+            else:
+                # Legacy: basic filtering + truncation
+                text = self.filter.filter(text)
+                if len(text) > self.config.max_length:
+                    text = self.filter.truncate(text, self.config.max_length)
 
-        # Truncate if too long
-        if len(text) > self.config.max_length:
-            text = self.filter.truncate(text, self.config.max_length)
-
-        # Skip if nothing left after filtering
+        # Skip if nothing left after filtering/summarization
         if not text or not text.strip():
             logger.debug("Text filtered to empty string, skipping TTS")
             return False
@@ -415,6 +426,11 @@ class TTSManager:
                 "filter_markdown": self.config.filter_markdown,
                 "filter_file_paths": self.config.filter_file_paths,
                 "filter_urls": self.config.filter_urls,
+                "enable_ai_summarization": self.config.enable_ai_summarization,
+                "summarization_mode": self.config.summarization_mode,
+                "fallback_mode": self.config.fallback_mode,
+                "ollama_url": self.config.ollama_url,
+                "ollama_model": self.config.ollama_model,
             }
         }
 
