@@ -167,9 +167,15 @@
   "lanQR": {
     "title": "Connecter un appareil mobile",
     "description": "Scannez le code QR avec votre appareil mobile pour vous connecter à Auto CC",
+    "tabLan": "Réseau local",
+    "tabTailscale": "Tailscale",
+    "networkLan": "Réseau local",
+    "networkTailscale": "Tailscale",
     "manualEntry": "Ou entrez cette URL manuellement :",
-    "instructions": "Ouvrez votre navigateur mobile et scannez le code QR ou entrez l'URL ci-dessus pour accéder à Auto CC sur votre appareil mobile.",
+    "instructions": "Scannez ce code QR avec votre appareil mobile. Les deux appareils doivent être sur le même réseau local.",
+    "instructionsTailscale": "Scannez ce code QR avec votre appareil mobile. Les deux appareils doivent être connectés à votre réseau Tailscale.",
     "notAvailable": "URL de connexion non disponible",
-    "notAvailableDescription": "Impossible de générer une URL de connexion. Assurez-vous que le serveur LAN est en cours d'exécution et que vous êtes connecté à un réseau."
+    "notAvailableDescription": "Impossible de générer une URL de connexion. Assurez-vous que le serveur LAN est en cours d'exécution et que vous êtes connecté à un réseau.",
+    "notAvailableTailscale": "Tailscale n'est pas détecté sur cet appareil. Assurez-vous que Tailscale est installé et connecté."
   }
 }

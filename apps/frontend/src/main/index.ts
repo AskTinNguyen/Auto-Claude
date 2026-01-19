@@ -43,6 +43,7 @@ import { initSentryMain } from './sentry';
 import { preWarmToolCache } from './cli-tool-manager';
 import { initializeClaudeProfileManager } from './claude-profile-manager';
 import { HttpServerManager } from './http-server';
+import { createRpcMethods, createRpcHandler } from './rpc';
 import type { AppSettings } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -380,12 +381,19 @@ app.whenReady().then(() => {
   // Create window
   createWindow();
 
-  // Initialize HTTP server
+  // Initialize HTTP server with RPC handler and REST API
   httpServer = new HttpServerManager();
   const settings = loadSettingsSync();
-  httpServer.start(settings).catch((error) => {
+
+  // Create RPC methods with agent manager context
+  const rpcMethods = createRpcMethods({ agentManager });
+  const rpcHandler = createRpcHandler(rpcMethods);
+
+  httpServer.start(settings, rpcHandler, rpcMethods).catch((error) => {
     console.error('[main] Failed to start HTTP server:', error);
   });
+
+  console.log('[main] HTTP server initialized with RPC and REST API for mobile access');
 
   // Pre-warm CLI tool cache in background (non-blocking)
   // This ensures CLI detection is done before user needs it

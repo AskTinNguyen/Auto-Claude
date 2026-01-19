@@ -229,7 +229,8 @@ export function LanSettings({ settings, onSettingsChange }: LanSettingsProps) {
           <LanQRDialog
             open={showQRDialog}
             onClose={() => setShowQRDialog(false)}
-            url={lanUrls.lanWithPin || lanUrls.lan}
+            lanUrl={lanUrls.lanWithPin || lanUrls.lan}
+            tailscaleUrl={lanUrls.tailscaleWithPin || lanUrls.tailscale}
           />
         )}
       </div>

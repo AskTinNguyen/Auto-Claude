@@ -3,6 +3,10 @@
  *
  * Manages the HTTP server lifecycle with LAN access support and PIN authentication.
  * Uses Node.js http module (not Bun) for Electron compatibility.
+ *
+ * Provides multiple API styles for mobile clients:
+ * - JSON-RPC 2.0 at /rpc for programmatic access
+ * - REST-like API at /api/* for simpler HTTP access
  */
 
 import * as http from 'http';
@@ -16,6 +20,8 @@ import {
   logLanAccessInfo,
 } from './lan';
 import type { LanUrls, RequestHandler } from './lan';
+import type { RpcMethodRegistry } from './rpc/types';
+import { createRestRoutes, createDynamicRestHandler } from './rpc/rest-routes';
 
 /**
  * HTTP Server Manager
@@ -28,15 +34,26 @@ export class HttpServerManager {
   private actualPort: number = 0;
 
   /**
+   * RPC methods registry (stored for REST routes)
+   */
+  private rpcMethods: RpcMethodRegistry | null = null;
+
+  /**
    * Start the HTTP server with given settings
    *
    * @param settings Application settings
    * @param rpcHandler Optional RPC handler function
+   * @param rpcMethods Optional RPC methods registry for REST API
    */
   async start(
     settings: AppSettings,
-    rpcHandler?: RequestHandler
+    rpcHandler?: RequestHandler,
+    rpcMethods?: RpcMethodRegistry
   ): Promise<void> {
+    // Store RPC methods for REST routes
+    if (rpcMethods) {
+      this.rpcMethods = rpcMethods;
+    }
     // Stop existing server if running
     if (this.server) {
       await this.stop();
@@ -196,15 +213,95 @@ export class HttpServerManager {
       routes['/rpc'] = protect(rpcHandler);
     }
 
+    // Add REST API routes if RPC methods provided
+    let restRoutes: Record<string, RequestHandler> = {};
+    let dynamicRestHandler: RequestHandler | null = null;
+    if (this.rpcMethods) {
+      restRoutes = createRestRoutes(this.rpcMethods);
+      dynamicRestHandler = protect(createDynamicRestHandler(this.rpcMethods));
+
+      // Add static REST routes (protected)
+      for (const [path, handler] of Object.entries(restRoutes)) {
+        routes[path] = protect(handler);
+      }
+
+      // Add API documentation endpoint
+      routes['/api'] = async () => {
+        return new Response(
+          JSON.stringify({
+            name: 'Auto Claude Mobile API',
+            version: '1.0.0',
+            endpoints: {
+              rpc: {
+                path: '/rpc',
+                method: 'POST',
+                description: 'JSON-RPC 2.0 endpoint',
+                methods: [
+                  'project.list', 'project.get', 'project.getActive', 'project.setActive',
+                  'task.list', 'task.get', 'task.create', 'task.delete',
+                  'task.start', 'task.stop', 'task.getStatus', 'task.updateStatus',
+                  'system.health', 'system.version', 'system.getLogs'
+                ]
+              },
+              rest: {
+                projects: {
+                  'GET /api/projects': 'List all projects',
+                  'GET /api/projects/active': 'Get active project',
+                  'GET /api/projects/:id': 'Get project by ID',
+                  'POST /api/projects/:id/activate': 'Set active project',
+                  'GET /api/projects/:id/tasks': 'List tasks for project',
+                  'POST /api/projects/:id/tasks': 'Create task in project'
+                },
+                tasks: {
+                  'GET /api/tasks/:id': 'Get task by ID',
+                  'DELETE /api/tasks/:id': 'Delete task',
+                  'POST /api/tasks/:id/start': 'Start task',
+                  'POST /api/tasks/:id/stop': 'Stop task',
+                  'GET /api/tasks/:id/status': 'Get task status',
+                  'PUT /api/tasks/:id/status': 'Update task status',
+                  'GET /api/tasks/:id/logs': 'Get task logs'
+                },
+                system: {
+                  'GET /api/health': 'Health check',
+                  'GET /api/version': 'Get version info'
+                }
+              }
+            },
+            authentication: {
+              method: 'PIN',
+              description: 'Authenticate via GET /auth?pin=XXXX to receive auth cookie'
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      };
+    }
+
     // Return Node.js http handler
     return async (req: http.IncomingMessage, res: http.ServerResponse) => {
       try {
         // Convert to Request object for middleware compatibility
         const url = new URL(req.url || '/', `http://${req.headers.host}`);
-        const request = this.createFetchRequest(req, url);
 
-        // Find matching route
-        const handler = routes[url.pathname];
+        // Read body for POST/PUT/PATCH requests
+        let body: string | undefined;
+        const method = req.method || 'GET';
+        if (method !== 'GET' && method !== 'HEAD') {
+          body = await this.readRequestBody(req);
+        }
+
+        const request = this.createFetchRequest(req, url, body);
+
+        // Find matching route (exact match first)
+        let handler = routes[url.pathname];
+
+        // If no exact match and path starts with /api/, try dynamic REST handler
+        if (!handler && url.pathname.startsWith('/api/') && dynamicRestHandler) {
+          handler = dynamicRestHandler;
+        }
 
         let response: Response;
         if (handler) {
@@ -244,15 +341,41 @@ export class HttpServerManager {
   }
 
   /**
+   * Read request body from Node.js IncomingMessage
+   *
+   * @param req Node.js request
+   * @returns Promise resolving to body string
+   */
+  private readRequestBody(req: http.IncomingMessage): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+
+      req.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
+      req.on('end', () => {
+        resolve(Buffer.concat(chunks).toString('utf-8'));
+      });
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+    });
+  }
+
+  /**
    * Convert Node.js IncomingMessage to Fetch API Request
    *
    * @param req Node.js request
    * @param url Parsed URL
+   * @param body Optional body string for POST/PUT requests
    * @returns Fetch API Request
    */
   private createFetchRequest(
     req: http.IncomingMessage,
-    url: URL
+    url: URL,
+    body?: string
   ): Request {
     const headers = new Headers();
     for (const [key, value] of Object.entries(req.headers)) {
@@ -275,12 +398,11 @@ export class HttpServerManager {
       });
     }
 
-    // For other methods, we'll handle the body as a stream
-    // Note: For simplicity, we're creating a Request without body
-    // since our current use case (PIN auth) doesn't require request bodies
+    // For POST/PUT/PATCH/DELETE, include body if provided
     return new Request(url.toString(), {
       method,
       headers,
+      body: body || undefined,
     });
   }
 
