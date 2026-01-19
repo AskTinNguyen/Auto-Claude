@@ -698,6 +698,40 @@ The client automatically enables Electron MCP tools for QA agents when:
 
 **Note:** Screenshots are automatically compressed (1280x720, quality 60, JPEG) to stay under Claude SDK's 1MB JSON message buffer limit.
 
+### Direct CDP Testing (Advanced)
+
+For testing Electron IPC and `window.electronAPI` functions directly, use the CDP WebSocket connection instead of agent-browser (which opens its own browser without Electron context).
+
+**Quick Start:**
+```bash
+# 1. Start Electron with CDP
+npm run dev:mcp  # Enables --remote-debugging-port=9222
+
+# 2. Get page ID
+curl -s http://localhost:9222/json | jq '.[0].id'
+
+# 3. Test via Node.js WebSocket
+node -e "
+const WebSocket = require('ws');
+const ws = new WebSocket('ws://localhost:9222/devtools/page/PAGE_ID_HERE');
+ws.on('open', () => {
+  ws.send(JSON.stringify({
+    id: 1,
+    method: 'Runtime.evaluate',
+    params: {
+      expression: 'window.electronAPI.getProjects().then(r => JSON.stringify(r))',
+      awaitPromise: true
+    }
+  }));
+});
+ws.on('message', (d) => { console.log(JSON.parse(d).result?.result?.value); ws.close(); });
+"
+```
+
+**Full documentation:** See `guides/electron-cdp-testing.md`
+
+**Key insight:** `window.electronAPI` only exists in the Electron renderer where the preload script runs. Regular browsers or agent-browser's Chromium won't have it.
+
 ## Running the Application
 
 **As a standalone CLI tool**:
