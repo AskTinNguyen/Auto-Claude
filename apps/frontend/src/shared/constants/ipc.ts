@@ -467,6 +467,17 @@ export const IPC_CHANNELS = {
   INSIGHTS_STATUS: 'insights:status',
   INSIGHTS_ERROR: 'insights:error',
 
+  // Documentation operations
+  DOCUMENTATION_LIST: 'documentation:list',
+  DOCUMENTATION_GENERATE: 'documentation:generate',
+  DOCUMENTATION_APPLY: 'documentation:apply',
+  DOCUMENTATION_VALIDATE: 'documentation:validate',
+
+  // Documentation events (main -> renderer)
+  DOCUMENTATION_GENERATION_PROGRESS: 'documentation:generationProgress',
+  DOCUMENTATION_GENERATION_COMPLETE: 'documentation:generationComplete',
+  DOCUMENTATION_ERROR: 'documentation:error',
+
   // File explorer operations
   FILE_EXPLORER_LIST: 'fileExplorer:list',
   FILE_EXPLORER_READ: 'fileExplorer:read',

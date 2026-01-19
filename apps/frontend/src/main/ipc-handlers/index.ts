@@ -38,6 +38,7 @@ import { registerScratchpadHandlers } from './scratchpad-handlers';
 import { registerRalphHandlers } from './ralph-handlers';
 import { registerTTSHandlers } from './tts-handlers';
 import { registerMonitoringHandlers } from './monitoring-handlers';
+import { registerDocumentationHandlers } from './documentation-handlers';
 import { notificationService } from '../notification-service';
 
 /**
@@ -138,6 +139,9 @@ export function setupIpcHandlers(
   // Monitoring handlers (cost tracking and heartbeat)
   registerMonitoringHandlers();
 
+  // Documentation handlers (generate, apply, validate)
+  registerDocumentationHandlers(getMainWindow);
+
   console.warn('[IPC] All handler modules registered successfully');
 }
 
@@ -169,5 +173,6 @@ export {
   registerScratchpadHandlers,
   registerRalphHandlers,
   registerTTSHandlers,
-  registerMonitoringHandlers
+  registerMonitoringHandlers,
+  registerDocumentationHandlers
 };
