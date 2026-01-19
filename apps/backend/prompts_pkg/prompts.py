@@ -628,3 +628,35 @@ The project root is: `{project_dir}`
 
 """
     return spec_context + base_prompt
+
+
+def get_pattern_extraction_prompt(task_id: str, changed_files: list[dict]) -> str:
+    """
+    Load the pattern extraction prompt with task details injected.
+
+    Args:
+        task_id: ID of the completed task/spec
+        changed_files: List of dicts with 'path' and 'content' keys
+
+    Returns:
+        The pattern extraction prompt with task details
+    """
+    base_prompt = _load_prompt_file("pattern_extractor.md")
+
+    # Format changed files for display
+    files_section = ""
+    for file_info in changed_files:
+        path = file_info.get("path", "unknown")
+        content = file_info.get("content", "")
+
+        # Truncate very long content
+        if len(content) > 3000:
+            content = content[:3000] + "\n\n[... truncated ...]"
+
+        files_section += f"\n### File: {path}\n\n```\n{content}\n```\n"
+
+    # Replace template variables
+    prompt = base_prompt.replace("{{task_id}}", task_id)
+    prompt = prompt.replace("{{changed_files}}", files_section)
+
+    return prompt

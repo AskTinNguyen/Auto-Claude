@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 
 from .schema import (
+    EPISODE_TYPE_CODE_PATTERN,
     EPISODE_TYPE_GOTCHA,
     EPISODE_TYPE_PATTERN,
     EPISODE_TYPE_SESSION_INSIGHT,
@@ -338,3 +339,81 @@ class GraphitiSearch:
         except Exception as e:
             logger.warning(f"Failed to get patterns/gotchas: {e}")
             return [], []
+
+    async def search_code_patterns(
+        self,
+        query: str,
+        limit: int = 5,
+        language: str | None = None,
+        min_score: float = 0.5,
+    ) -> list[dict]:
+        """
+        Search for code patterns relevant to the query.
+
+        Args:
+            query: Search query (task description or pattern name)
+            limit: Maximum number of results
+            language: Filter by programming language (optional)
+            min_score: Minimum relevance score (0.0-1.0)
+
+        Returns:
+            List of code patterns with metadata
+        """
+        try:
+            # Build search query
+            search_query = f"code pattern: {query}"
+            if language:
+                search_query += f" {language}"
+
+            results = await self.client.graphiti.search(
+                query=search_query,
+                group_ids=[self.group_id],
+                num_results=limit * 2,
+            )
+
+            patterns = []
+            for result in results:
+                content = getattr(result, "content", None) or getattr(
+                    result, "fact", None
+                )
+                score = getattr(result, "score", 0.0)
+
+                if score < min_score:
+                    continue
+
+                if content and EPISODE_TYPE_CODE_PATTERN in str(content):
+                    try:
+                        data = (
+                            json.loads(content) if isinstance(content, str) else content
+                        )
+                        # Ensure data is a dict before processing
+                        if not isinstance(data, dict):
+                            continue
+                        if data.get("type") == EPISODE_TYPE_CODE_PATTERN:
+                            # Filter by language if specified
+                            if language and data.get("language") != language:
+                                continue
+
+                            patterns.append(
+                                {
+                                    "pattern": data.get("pattern", ""),
+                                    "language": data.get("language"),
+                                    "context": data.get("context"),
+                                    "example": data.get("example"),
+                                    "score": score,
+                                }
+                            )
+                    except (json.JSONDecodeError, TypeError, AttributeError):
+                        continue
+
+            # Sort by score and limit
+            patterns.sort(key=lambda x: x.get("score", 0), reverse=True)
+
+            logger.info(
+                f"Found {len(patterns)} code patterns for: {query[:50]}..."
+            )
+            return patterns[:limit]
+
+        except Exception as e:
+            logger.warning(f"Failed to search code patterns: {e}")
+            return []

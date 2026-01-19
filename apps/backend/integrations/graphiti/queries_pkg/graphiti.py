@@ -271,6 +271,38 @@ class GraphitiMemory:
 
         return result
 
+    async def save_code_pattern(
+        self,
+        pattern: str,
+        language: str | None = None,
+        context: str | None = None,
+        example: str | None = None,
+    ) -> bool:
+        """
+        Save a code pattern to the knowledge graph.
+
+        Args:
+            pattern: Description of the code pattern
+            language: Programming language (optional)
+            context: Context where pattern applies (optional)
+            example: Code example demonstrating the pattern (optional)
+
+        Returns:
+            True if saved successfully
+        """
+        if not await self._ensure_initialized():
+            return False
+
+        result = await self._queries.add_code_pattern(
+            pattern, language, context, example
+        )
+
+        if result and self.state:
+            self.state.episode_count += 1
+            self.state.save(self.spec_dir)
+
+        return result
+
     async def save_task_outcome(
         self,
         task_id: str,
@@ -342,6 +374,32 @@ class GraphitiMemory:
             return []
 
         return await self._search.get_similar_task_outcomes(task_description, limit)
+
+    async def search_patterns(
+        self,
+        query: str,
+        limit: int = 5,
+        language: str | None = None,
+        min_score: float = 0.5,
+    ) -> list[dict]:
+        """
+        Search for code patterns relevant to the query.
+
+        Args:
+            query: Search query (task description or pattern name)
+            limit: Maximum number of results
+            language: Filter by programming language (optional)
+            min_score: Minimum relevance score (0.0-1.0)
+
+        Returns:
+            List of code patterns with metadata
+        """
+        if not await self._ensure_initialized():
+            return []
+
+        return await self._search.search_code_patterns(
+            query, limit, language, min_score
+        )
 
     async def get_patterns_and_gotchas(
         self,

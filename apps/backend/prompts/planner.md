@@ -67,6 +67,35 @@ Before creating the implementation plan, explicitly document:
 
 **If you skip this phase, your plan will be wrong.**
 
+### 0.4: Leverage Pattern Library (RECOMMENDED)
+
+**Use the pattern suggestion tools to find reusable patterns from previous successful builds:**
+
+```
+suggest_patterns(query="description of what you're building", category="", limit=5)
+```
+
+The pattern library contains proven patterns extracted from completed tasks. Benefits:
+- **Faster planning**: Reuse proven approaches instead of reinventing
+- **Consistency**: Follow established project patterns
+- **Quality**: Patterns include usage stats and success rates
+
+**When to use patterns:**
+- Building similar features (e.g., "API endpoint", "form validation", "error handling")
+- Implementing common architectures (e.g., "state management", "database queries")
+- Following project conventions you discovered in Phase 0
+
+**Example:**
+```
+# If building an API endpoint
+suggest_patterns(query="REST API endpoint with validation and error handling", category="api")
+
+# If building a React component
+suggest_patterns(query="React component with state and effects", category="component")
+```
+
+**Review suggested patterns and incorporate them into your subtasks.**
+
 ---
 
 ## PHASE 1: READ AND CREATE CONTEXT FILES
