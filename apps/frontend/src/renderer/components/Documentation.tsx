@@ -56,7 +56,7 @@ export function Documentation({ projectId }: DocumentationProps) {
   const {
     items,
     selectedItemId,
-    setSelectedItemId,
+    selectItem,
     isLoading,
     error
   } = useDocumentationStore();
@@ -71,7 +71,7 @@ export function Documentation({ projectId }: DocumentationProps) {
 
   // Handle item selection
   const handleSelectItem = (itemId: string) => {
-    setSelectedItemId(itemId);
+    selectItem(itemId);
   };
 
   // Handle generate documentation
@@ -80,10 +80,11 @@ export function Documentation({ projectId }: DocumentationProps) {
     setGenerationError(null);
     try {
       // TODO: Add dialog to configure documentation generation
-      // For now, generate docs for the whole project
-      await generateDocumentation(projectId, {
-        types: ['docstring', 'jsdoc'],
-        targetPath: '.'
+      // For now, generate docstrings for the whole project
+      await generateDocumentation({
+        type: 'docstring',
+        filePath: projectId,
+        context: 'Generate documentation for project files'
       });
       // Reload items after generation
       await loadDocumentationItems(projectId);
