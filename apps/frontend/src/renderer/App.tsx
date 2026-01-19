@@ -470,10 +470,12 @@ export function App() {
       (t) => t.id === selectedTask.id || t.specId === selectedTask.specId
     );
 
-    debugLog('[App] Task lookup result', {
+    console.warn('[App] Task update check:', {
+      selectedTaskId: selectedTask.id,
+      selectedSubtasks: selectedTask.subtasks.length,
       found: !!updatedTask,
       updatedTaskId: updatedTask?.id,
-      selectedTaskId: selectedTask.id,
+      updatedSubtasks: updatedTask?.subtasks.length || 0,
     });
 
     if (!updatedTask) {
@@ -507,19 +509,11 @@ export function App() {
       metadataChanged || executionProgressChanged || qaReportChanged ||
       reviewReasonChanged || logsChanged;
 
-    debugLog('[App] Task comparison', {
+    console.warn('[App] Task comparison result:', {
       hasChanged,
-      changes: {
-        subtasks: subtasksChanged,
-        status: statusChanged,
-        title: titleChanged,
-        description: descriptionChanged,
-        metadata: metadataChanged,
-        executionProgress: executionProgressChanged,
-        qaReport: qaReportChanged,
-        reviewReason: reviewReasonChanged,
-        logs: logsChanged,
-      },
+      subtasksChanged,
+      selectedSubtasksCount: selectedTask.subtasks.length,
+      updatedSubtasksCount: updatedTask.subtasks.length,
     });
 
     if (hasChanged) {
@@ -534,9 +528,10 @@ export function App() {
       if (reviewReasonChanged) reasons.push('ReviewReason');
       if (logsChanged) reasons.push('Logs');
 
-      debugLog('[App] Updating selectedTask', {
+      console.warn('[App] Updating selectedTask:', {
         taskId: updatedTask.id,
         reason: reasons.join(', '),
+        newSubtaskCount: updatedTask.subtasks.length,
       });
       setSelectedTask(updatedTask);
     }
