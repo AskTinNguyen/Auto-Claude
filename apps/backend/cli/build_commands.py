@@ -229,9 +229,27 @@ def handle_build_command(
     if flow == "ralph":
         print_status("Using Ralph CLI (fresh-instance-per-subtask)", "info")
         from integrations.ralph_cli import RalphCLI
+        from integrations.ralph_cli import sync_spec_to_prd, ensure_ralph_files
 
-        ralph = RalphCLI(project_dir)
+        # Prepare Ralph files AFTER workspace setup
+        # (workspace setup may have copied files from main project)
+        print_status("Preparing Ralph CLI files...", "info")
+        sync_spec_to_prd(spec_dir)
+        ensure_ralph_files(spec_dir)
+
+        # Use working_dir (worktree) if in isolated mode, otherwise project_dir
+        ralph = RalphCLI(working_dir)
         try:
+            # Ralph requires a plan.md file before building
+            # If it doesn't exist, create it from the PRD
+            plan_file = spec_dir / "plan.md"
+            if not plan_file.exists():
+                print_status("Creating Ralph implementation plan...", "info")
+                plan_exit = asyncio.run(ralph.plan(spec_dir, iterations=1))
+                if plan_exit != 0:
+                    print_status(f"Ralph plan creation failed with exit code {plan_exit}", "error")
+                    sys.exit(plan_exit)
+
             exit_code = asyncio.run(
                 ralph.build(
                     spec_dir=spec_dir,
