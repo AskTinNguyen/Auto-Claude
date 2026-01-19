@@ -79,7 +79,8 @@
     "add": "Add",
     "gotIt": "Got it",
     "continue": "Continue",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "generateDocumentation": "Generate Documentation"
   },
   "labels": {
     "loading": "Loading...",
@@ -91,7 +92,22 @@
     "noData": "No data",
     "optional": "Optional",
     "required": "Required",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "confirmDiscard": "Are you sure you want to discard this documentation?",
+    "noSelection": "No documentation selected",
+    "content": "Content",
+    "modified": "Modified",
+    "resetToGenerated": "Reset to generated",
+    "enterContent": "Enter documentation content...",
+    "discard": "Discard",
+    "save": "Save",
+    "apply": "Apply",
+    "preview": "Preview",
+    "copied": "Copied!",
+    "copy": "Copy",
+    "noContent": "No content to preview",
+    "noDocumentation": "No Documentation",
+    "generating": "Generating..."
   },
   "selection": {
     "select": "Select",
@@ -120,6 +136,9 @@
     "failedToDeleteTaskWorktree": "Failed to delete task worktree: {{specName}}",
     "terminalWorktreeNotFound": "Terminal worktree not found: {{name}}",
     "failedToDeleteTerminalWorktree": "Failed to delete terminal worktree: {{name}}"
+  },
+  "messages": {
+    "noDocumentationGenerated": "No documentation has been generated yet. Click the button below to start."
   },
   "notification": {
     "accountSwitched": "Account Switched",

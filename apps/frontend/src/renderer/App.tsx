@@ -42,6 +42,7 @@ import { GitLabIssues } from './components/GitLabIssues';
 import { GitHubPRs } from './components/github-prs';
 import { GitLabMergeRequests } from './components/gitlab-merge-requests';
 import { Changelog } from './components/Changelog';
+import { Documentation } from './components/Documentation';
 import { Worktrees } from './components/Worktrees';
 import { AgentTools } from './components/AgentTools';
 import { ScratchPadView } from './components/scratchpad/ScratchPadView';
@@ -901,6 +902,9 @@ export function App() {
                 {activeView === 'agent-tools' && <AgentTools />}
                 {activeView === 'monitoring' && (activeProjectId || selectedProjectId) && (
                   <MonitoringPanel projectId={activeProjectId || selectedProjectId!} />
+                )}
+                {activeView === 'documentation' && (activeProjectId || selectedProjectId) && (
+                  <Documentation projectId={activeProjectId || selectedProjectId!} />
                 )}
               </>
             ) : (

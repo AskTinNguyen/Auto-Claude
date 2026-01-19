@@ -22,6 +22,11 @@ from .batch_commands import (
     handle_batch_status_command,
 )
 from .build_commands import handle_build_command
+from .documentation_commands import (
+    handle_generate_docs_command,
+    handle_update_docs_command,
+    handle_validate_docs_command,
+)
 from .followup_commands import handle_followup_command
 from .qa_commands import (
     handle_qa_command,
@@ -349,6 +354,47 @@ Environment Variables:
         help="Preview bug categorization without API calls",
     )
 
+    # Documentation commands
+    doc_group = parser.add_argument_group("Documentation")
+    doc_group.add_argument(
+        "--generate-docs",
+        action="store_true",
+        help="Generate documentation (docstrings, README, changelog)",
+    )
+    doc_group.add_argument(
+        "--update-docs",
+        action="store_true",
+        help="Update existing documentation",
+    )
+    doc_group.add_argument(
+        "--validate-docs",
+        action="store_true",
+        help="Validate documentation completeness",
+    )
+    doc_group.add_argument(
+        "--doc-type",
+        choices=["docstrings", "readme", "changelog", "all"],
+        default="all",
+        help="Type of documentation to generate/update (default: all)",
+    )
+    doc_group.add_argument(
+        "--doc-target",
+        type=Path,
+        metavar="PATH",
+        help="Specific file or directory to document (default: entire project)",
+    )
+    doc_group.add_argument(
+        "--doc-output",
+        type=Path,
+        metavar="PATH",
+        help="Path to write generated documentation (optional)",
+    )
+    doc_group.add_argument(
+        "--strict",
+        action="store_true",
+        help="With --validate-docs: treat warnings as errors",
+    )
+
     return parser.parse_args()
 
 
@@ -460,6 +506,35 @@ def _run_cli() -> None:
         from cli.bug_commands import run_bug_deep_dive_command
 
         run_bug_deep_dive_command(args)
+        return
+
+    # Handle Documentation commands
+    if args.generate_docs:
+        handle_generate_docs_command(
+            project_dir=project_dir,
+            target_path=args.doc_target,
+            doc_type=args.doc_type,
+            output_path=args.doc_output,
+            verbose=args.verbose,
+        )
+        return
+
+    if args.update_docs:
+        handle_update_docs_command(
+            project_dir=project_dir,
+            target_path=args.doc_target,
+            doc_type=args.doc_type,
+            verbose=args.verbose,
+        )
+        return
+
+    if args.validate_docs:
+        handle_validate_docs_command(
+            project_dir=project_dir,
+            target_path=args.doc_target,
+            strict=args.strict,
+            verbose=args.verbose,
+        )
         return
 
     # Require --spec if not listing
