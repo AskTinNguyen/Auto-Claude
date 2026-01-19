@@ -494,8 +494,12 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
                       {/* Metadata */}
                       <TaskMetadata task={task} />
 
-                      {/* Spec Content from spec.md */}
-                      <TaskSpecContent task={task} />
+                      {/* Spec Content from spec.md - only show if description is short/missing
+                          For Auto-Claude tasks, description already contains full spec.md
+                          For Ralph tasks, description is just a summary, so show full spec */}
+                      {(!task.description || task.description.length < 500) && (
+                        <TaskSpecContent task={task} />
+                      )}
 
                       {/* Human Review Section */}
                       {state.needsReview && (
